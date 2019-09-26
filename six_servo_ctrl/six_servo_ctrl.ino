@@ -1,5 +1,9 @@
 #include <Servo.h>
 
+// Dependent on this matrix multiplication library: https://playground.arduino.cc/Code/MatrixMath/
+// Must be manually setup by the user (rly easy)
+#include <MatrixMath.h>
+
 // Servo movement limits in degrees
 #define mechanical_angle_limit_max    175
 #define mechanical_angle_limit_min    5
