@@ -1,13 +1,20 @@
 #include "motor.hpp"
+#include <Arduino.h>
 
-// Dependent on this matrix multiplication library: https://playground.arduino.cc/Code/MatrixMath/
-// Must be manually setup by the user (rly easy)
-#include <MatrixMath.h>
+// Function that printf and related will use to print
+int serial_putchar(char c, FILE* f) {
+    if (c == '\n') serial_putchar('\r', f);
+    return Serial.write(c) == 1? 0 : 1;
+}
 
 /* --------------------------- Environment Setup ---------------------*/
 
 // Grab Variable from motor.hpp. We are sharing global variables btwn files
 Servo servos[num_servos];
+
+// Setup for non garbage printing to console
+// https://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
+FILE serial_stdout;
 
 /* ------------------------ Main() Functions -----------------------*/
 
