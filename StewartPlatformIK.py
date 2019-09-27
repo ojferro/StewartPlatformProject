@@ -22,7 +22,7 @@ Ob = np.array([0, 0, 0])
 Op = np.array([0, 0, 10])
 
 #Total relative translation vector from base to platform
-T_current = Op-Ob
+T = Op-Ob
 #Rotation pure quaternion (i.e. axis of rotation) from base to platform
 R = np.array([1 0 0])
 
