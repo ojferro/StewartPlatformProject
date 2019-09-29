@@ -11,9 +11,10 @@
 #define functional_angle_max    175
 #define functional_angle_min    5
 
-// Movement delay (fastest)
-#define mvmt_delay_min          1
-#define mvmt_delay_max          30
+// Movement delay parameters
+#define mvmt_delay_min            2   // ms
+#define mvmt_delay_max            30  // ms
+#define ramp_distance_percentage  0.4 // %
 
 // Pins are offset from their array mapping to their PWM pin mapping
 #define servo_pin_offset  2
@@ -51,22 +52,23 @@ void write_all_servos(int target_angle) {
   }
 }
 
-void control_and_delay_motor(servos_idx_e servo, int target_angle, int next_angle) {
-  int delay_time = map((180 - abs(target_angle - next_angle)), functional_angle_min, functional_angle_max, mvmt_delay_min, mvmt_delay_max);
-  servos[servo].write(next_angle);
-  delay(delay_time);
-}
-
 void simple_ramp(servos_idx_e servo, int target_angle) {
-  int current_angle = servos[servo].read();
-  int total_error = target_angle - current_angle;
-  
-  for (int i = abs(total_error); i > 0; i--) {
-    // Get the next angle dependent on if going left or right
-    current_angle = ((total_error > 0) ? (++current_angle) : (--current_angle));
+  int original_angle = servos[servo].read();
+  int current_angle = original_angle;
+  int delay_time = mvmt_delay_max;
+  int total_error = abs(target_angle - current_angle);
+  int ramp_dist = ceil(float(total_error * ramp_distance_percentage));
 
-    // Write next angle
-    control_and_delay_motor(servo, target_angle, current_angle);
+  for (int i = total_error; i > 0; i--) {
+    if ((abs(original_angle - current_angle) < ramp_dist)) { // In Ramp-Up
+      delay_time = map(abs(original_angle - current_angle), 0, ramp_dist, mvmt_delay_max, mvmt_delay_min);
+    } else if ((abs(current_angle - target_angle) < ramp_dist)) { // In Ramp-Down
+      delay_time = map(abs(current_angle - target_angle), 0, ramp_dist, mvmt_delay_max, mvmt_delay_min);
+    } // Else Maintain Speed
+    
+    current_angle = (target_angle > original_angle) ? (++current_angle) : (--current_angle);
+    servos[servo].write(current_angle);
+    delay(delay_time);
   }
 }
 
