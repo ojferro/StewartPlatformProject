@@ -1,4 +1,5 @@
 #include "motor.hpp"
+#include "input.hpp"
 #include <Arduino.h>
 
 // Function that printf and related will use to print
@@ -26,25 +27,40 @@ void setup() {
     servos[servo_4].attach(servo_4 + servo_pin_offset); // pin 5
     servos[servo_5].attach(servo_5 + servo_pin_offset); // pin 6
     servos[servo_6].attach(servo_6 + servo_pin_offset); // pin 7
+
+    fdev_setup_stream(&serial_stdout, serial_putchar, NULL, _FDEV_SETUP_WRITE);
+    stdout = &serial_stdout;
 }
 
 void loop() {
-  servos[servo_1].write(0);
-  delay(15);
-  Serial.println("STARTING NOW"); 
-  servos[servo_1].write(180);
-  
-  while(1) {
-    Serial.println(servos[servo_1].read());
-  }
-
-//  for (pos = mechanical_angle_min; pos < mechanical_angle_max; pos++) {
-//    write_all_servos(pos);
-//    delay(15);
+  run_input_test();
+//  calibrate();
+//  delay(1000);
+//
+//  while(1) {
+//    simple_ramp(servo_1, 180);
+//    delay(1000);
+//    simple_ramp(servo_1, 0);
+//    delay(1000);
 //  }
 //  
-//  for (pos = mechanical_angle_max; pos > mechanical_angle_min; pos--) {
-//    write_all_servos(pos);
-//    delay(15);
+//  servos[servo_1].write(0);
+//  delay(15);
+//  Serial.println("STARTING NOW"); 
+//  servos[servo_1].write(180);
+//  
+//  while(1) {
+//    Serial.println(servos[servo_1].read());
+//  }
+//  while(1) {
+//    for (int pos = mechanical_angle_min; pos < mechanical_angle_max; pos++) {
+//      write_all_servos(pos);
+//      delay(15);
+//    }
+//    
+//    for (int pos = mechanical_angle_max; pos > mechanical_angle_min; pos--) {
+//      write_all_servos(pos);
+//      delay(15);
+//    }
 //  }
 }
