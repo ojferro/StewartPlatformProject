@@ -17,6 +17,9 @@ Servo servos[num_servos];
 // https://arduino.stackexchange.com/questions/176/how-do-i-print-multiple-variables-in-a-string
 FILE serial_stdout;
 
+int x_pos = 0;
+int y_pos = 0;
+
 /* ------------------------ Main() Functions -----------------------*/
 
 void setup() {
@@ -33,7 +36,9 @@ void setup() {
 }
 
 void loop() {
-  run_input_test();
+  read_joystick(x_pos, y_pos);
+  printf("VRx: %d -- VRy: %d\r\n", x_pos, y_pos);
+
 //  calibrate();
 //  delay(1000);
 //
