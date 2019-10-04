@@ -1,5 +1,7 @@
 #include <Servo.h>
 #include "linmath.h"
+#include "motor.hpp"
+#include "inv_kin.hpp"
 
 
 // Rotation quaternion from base to platform
@@ -7,11 +9,6 @@ quat q1 = {3, 8, 4.5, 1.5};
 quat q2 = {0, 1, 0, 1};
 vec3 v1 = {1, 0, 2};
 vec3 v2 = {1, -4, -5};
-
-// temporary placeholders
-#define X 0
-#define Y 0
-#define Z 0
 
 
 void setup() {
@@ -40,7 +37,7 @@ void PrintVec3(vec3 v, char* log_message) {
     Serial.println("]");
 }
 
-void loop() {
+void TestQuaternionMath(void) {
     quat q_ans;
     float f_ans;
     vec3 v_ans;
@@ -66,24 +63,23 @@ void loop() {
     // Verify vector X quaternion
     quat_mul_vec3(v_ans, q1, v1);
     PrintVec3(v_ans, "q1 X v1 = ");
+}
 
-    quat p_ks[6] = {
-        {X, Y, Z, 0},
-        {X, Y, Z, 0}, 
-        {X, Y, Z, 0},
-        {X, Y, Z, 0},
-        {X, Y, Z, 0},
-        {X, Y, Z, 0}
-    };
+void loop() {
+    
+    for (int i=0; i<num_servos; i++) {
+        // Calculate effective leg length for each servo
+        CalcLegLength(eff_leg_lengths[i], bp_translations[i], bp_rots[i], servo_pcoords[i], servo_bcoords[i]);
+        // Compute corresponding servo angle
+        target_angles[i] =  (int)RAD2DEG(CalcAlpha(eff_leg_lengths[i], betas[i]));
 
-    quat b_ks[6] = {
-        {X, Y, Z, 0},
-        {X, Y, Z, 0}, 
-        {X, Y, Z, 0},
-        {X, Y, Z, 0},
-        {X, Y, Z, 0},
-        {X, Y, Z, 0}
-    };
+        Serial.print("alpha[");
+        Serial.print(i);
+        Serial.print("] = ");
+        Serial.println(target_angles[i]);
+    }
+
+    move_motors(target_angles);
     
     while(1) {
       

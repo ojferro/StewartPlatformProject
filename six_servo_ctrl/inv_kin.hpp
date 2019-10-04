@@ -3,7 +3,10 @@
 
 #include "linmath.h"
 
-#define R_NEUTRAL_W 1.570796 // 90 degrees
+#define DEG2RAD(degree) (degree*M_PI/180.0)
+#define RAD2DEG(radian) (radian*180.0/M_PI)
+
+#define R_NEUTRAL_W (DEG2RAD(0)) // In RADIANS
 #define R_NEUTRAL_X 0
 #define R_NEUTRAL_Y 0
 #define R_NEUTRAL_Z 0
@@ -12,29 +15,17 @@
 #define T_NEUTRAL_Y 0
 #define T_NEUTRAL_Z 10 // Arbitrarily defined for now
 
-#define SERVO_HORN_LENGTH 5.0
-#define ROD_LENGTH 15.0
+#define SERVO_HORN_LENGTH 16.52
+#define ROD_LENGTH 147.395
 
-#define SERVO_HORN_ROTATION_1 50.0
-#define SERVO_HORN_ROTATION_2 100.0
-#define SERVO_HORN_ROTATION_3 150.0
-#define SERVO_HORN_ROTATION_4 200.0
-#define SERVO_HORN_ROTATION_5 250.0
-#define SERVO_HORN_ROTATION_6 300.0
-
-// Rotation quaternion from base to platform
-quat R_pb = {R_NEUTRAL_W, R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z};
-// Translation vector from base to platform (defined as pure quaternion with w=0 for ease of use)
-quat T_pb = {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0};
-
-// Servo horn rotations at build time (beta_k)
-float beta_k[6] = {
-    SERVO_HORN_ROTATION_1,
-    SERVO_HORN_ROTATION_2,
-    SERVO_HORN_ROTATION_3,
-    SERVO_HORN_ROTATION_4,
-    SERVO_HORN_ROTATION_5,
-    SERVO_HORN_ROTATION_6
+// Servo horn rotations at build time (beta_k) in RADIANS
+float betas[num_servos] = {
+    DEG2RAD(0),
+    DEG2RAD(240),
+    DEG2RAD(240),
+    DEG2RAD(120),
+    DEG2RAD(120),
+    DEG2RAD(0)
 };
 
 // Distance from servo shaft to servo end (where rod is connected)
@@ -42,6 +33,52 @@ float h = SERVO_HORN_LENGTH;
 
 // Distance from servo base joint to platform joint (aka length of rod)
 float d = ROD_LENGTH;
+
+// Defines coordinate of servo joint on base wrt base origin
+quat servo_bcoords[num_servos] = {
+    {-30.0, -86.75, 0, 0},
+    {-90.13, 17.4, 0, 0}, 
+    {-60.13, 69.36, 0, 0},
+    {60.13, 69.36, 0, 0},
+    {90.13, 17.4, 0, 0},
+    {30, -86.75, 0, 0}
+};
+
+// Defines coordinate of servo joint on platform wrt platform origin
+quat servo_pcoords[num_servos] = {
+    {-44.68, -51.78, 0, 0},
+    {-67.18, -12.8, 0, 0},
+    {-22.5, 64.58, 0, 0},
+    {22.5, 64.58, 0, 0},
+    {67.18, -12.8 0, 0},
+    {44.68, -51.78, 0, 0}
+};
+
+// Stores calculated target angles we want to reach
+int target_angles[num_servos];
+
+// Effective leg lengths (l_k values)
+quat eff_leg_lengths[num_servos];
+
+// Defines translation from base to platform
+quat bp_translations[num_servos] = {
+    {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0},
+    {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0},
+    {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0},
+    {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0},
+    {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0},
+    {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0}
+};
+
+// Defines rotation from base to platform
+quat bp_rots[num_servos] = {
+    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W}
+};
 
 /* 
     Calculates l_k (effective leg length) from base to platform
@@ -80,7 +117,7 @@ float CalcL2Norm(quat q) {
     return sqrt(result);
 }
 
-// Calculates servo rotation angle (alpha_k)
+// Calculates servo rotation angle (alpha_k) in RADIANS
 float CalcAlpha(quat l_k, float B_k) {
     // Calculate e_k = 2*|h|*l_k[z]
     float e_k = 2*h*l_k[2];
