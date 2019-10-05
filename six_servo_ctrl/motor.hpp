@@ -11,7 +11,7 @@
 #define functional_angle_max    175
 #define functional_angle_min    5
 
-// Ramp Movement Delay Parameters
+// Ramp Movement Delay Parameters (NOT USING RIGHT NOW)
 #define mvmt_delay_min            2   // ms
 #define mvmt_delay_max            30  // ms
 #define ramp_distance_percentage  0.4 // %
@@ -29,20 +29,34 @@ typedef enum {
   num_servos
 } servos_idx_e;
 
-extern Servo servos[num_servos];  
+// Directly included in other files
+Servo servos[num_servos];  
 
-float max_angular_speed[6] = {1.0};
+void print_array(int arr[], int num) {
+  for (int i = 0; i < num; i++) {
+    printf("%d ", arr[i]);
+  }
+  printf("\r\n");
+}
+
+bool angle_in_bounds(int target_angle) {
+  return ((target_angle < mechanical_angle_max) && (target_angle > mechanical_angle_min) &&
+          (target_angle < functional_angle_max) && (target_angle > functional_angle_min));
+}
+void print_angles() {
+  for (int servo = servo_1; servo < num_servos; servo++) {
+    printf("Servo: %d - Angle: %d\r\n", servo, servos[servo].read());
+  }
+}
 
 /* --------------------------- Motor Actuation Functions ------------------------------*/
 
 void write_servo_position(servos_idx_e servo, int target_angle) {
   // Ensure target angle within mechanical & functional limits
-  if (target_angle < mechanical_angle_max && target_angle > mechanical_angle_min &&
-      target_angle < functional_angle_max && target_angle > functional_angle_min) {
+  if  (angle_in_bounds(target_angle)) {
         servos[servo].write(target_angle);
   }
 }
-
 
 int write_servo_delta(servos_idx_e servo, int delta) {
   int current_angle = servos[servo].read();
@@ -70,25 +84,42 @@ void simple_ramp(servos_idx_e servo, int target_angle) {
   }
 }
 
-void drive_motors(int target_angles[6], int delay_time[6], int mvmt_direction[6]) {
-  uint8_t motor_moving = 0b00111111;
-  int last_time_moved[6] = {0};
-  int current_angle = 0;
+void drive_motors(int target_angles[num_servos], int delay_time_ms[num_servos], int mvmt_direction[num_servos]) {
+  uint8_t motor_moving = 0;
+  int last_time_moved[num_servos] = {0};
 
+  // Create a byte with 1 bit for each that needs to move
+  for (int servo = 0; servo < num_servos; servo++) {
+    motor_moving |= ((delay_time_ms[servo] != 0) << servo);
+  }
+ 
   while (motor_moving != 0) { // This may be weird, but provides a simple check to see if all motors reached target
+    
     for (int servo = 0; servo < num_servos; servo++) { // For each servo
-      if ((millis() - last_time_moved[servo]) > delay_time[servo]) { // If we have waited one delay cycle for this servo
+            
+      if ((motor_moving  & (1 << servo)) && (millis() - last_time_moved[servo]) > delay_time_ms[servo]) { // If servo not done & waited one delay cycle
         last_time_moved[servo] = millis();
 
         // Get current angle & move 1 degree (kind of an awkward implementation)
-        current_angle = write_servo_delta((servos_idx_e)servo, mvmt_direction[servo]);
+        int current_angle = write_servo_delta((servos_idx_e) servo, mvmt_direction[servo]);
 
         // If reached target angle for this servo, turn off the bit
-        if (current_angle == target_angles[servo]) { //done
+        if (current_angle == target_angles[servo]) { // done
           motor_moving &= ~(1 << servo);
+//          printf("Servo: %d Done Time: %d\r\n", servo, millis());
         }
       }
     }
+  }
+}
+
+int map_velocity_to_delay(float omega) {
+  if (omega == 0) {
+    printf("ERROR: velocity = 0\r\n");
+    return 0;
+  } else {
+    float temp_delay = 1.0 / omega;
+    return round(temp_delay);
   }
 }
 
@@ -96,22 +127,30 @@ void drive_motors(int target_angles[6], int delay_time[6], int mvmt_direction[6]
 
 
 void calibrate() {
-  // Calibration process & setup
+  for(int servo = servo_1; servo < num_servos; servo++) {
+    servos[servo].write(90);
+  }
+  print_angles();
 }
 
 
-void move_motors(int target_angles[6]) {
-  int error[6] = {0};
-  int mvmt_direction[6] = {0};
-  float max_travel_time = 0;
+bool move_motors(int target_angles[num_servos]) {
+  int error[num_servos] = {0};
+  int mvmt_direction[num_servos] = {0};
+  volatile float max_travel_time = 0; // Arduino IDE needs this to be volatile for some god forsaken reason
   float travel_time = 0;
   int slowest_servo; // Not using enum type because it reduces needed typecasts
 
   // Find distances & times for each motor given target
-  for (int servo; servo < num_servos; servo++) {
-    error[servo] = (servos[servo].read() - target_angles[servo]);
+  for (int servo = 0; servo < num_servos; servo++) {
+    // Return early if any angles are bad
+    if (!angle_in_bounds(target_angles[servo])) {
+      return false;
+    }
+    
+    error[servo] = (target_angles[servo] - servos[servo].read());
     mvmt_direction[servo] = (error[servo] < 0) ? -1 : 1;
-    travel_time = (abs(error[servo]) / max_angular_speed[servo]); // FILL IN WITH VELOCITY CALCS
+    travel_time = (abs(error[servo]) / 1); // V = 1 / d, min d = 1 -> Vmax = 1
 
     // Get the slowest motor
     if (travel_time > max_travel_time) {
@@ -122,16 +161,20 @@ void move_motors(int target_angles[6]) {
 
   // Find desired speed for each motor given longest travel time
   // Then find required delay in ms for each calculated speed
-  int delay_time[6] = {0};
+  int delay_time[num_servos] = {0};
   float desired_angular_speed = 0;
-  for (int servo; servo < num_servos; servo++) {
+  
+  for (int servo = 0; servo < num_servos; servo++) {
     if (servo == slowest_servo) { // Use the existing max speed of slowest servo
-      delay_time[servo] = 0; // FILL IN WITH VELOCITY CALCS
+      delay_time[servo] = 1; // min d = 1;
+    } else if (error[servo] == 0) { 
+      delay_time[servo] = 0; // No movement required for this motor
     } else { // Compute the slower w of each of the remaining motors
       desired_angular_speed = error[servo] / max_travel_time;
-      delay_time[servo] = 0; // FILL IN WITH VELOCITY CALCS
+      delay_time[servo] = map_velocity_to_delay(abs(desired_angular_speed));
     }
   }
 
-  return drive_motors(target_angles, delay_time, mvmt_direction);  
+  drive_motors(target_angles, delay_time, mvmt_direction);  
+  return true;
 }

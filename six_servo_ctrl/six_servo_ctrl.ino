@@ -21,6 +21,15 @@ void setup() {
 }
 
 void loop() {
+  printf("Starting\r\n");
   calibrate();
   delay(2000);
+
+  printf("Moving Now\r\n");
+  int angles[6] = {90, 90, 90, 90, 165, 45};
+  move_motors(angles);
+
+  printf("Done\r\n");
+
+  while(1) {}
 }
