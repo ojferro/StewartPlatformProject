@@ -63,56 +63,89 @@ void TestIkNeutral(void) {
   move_motors(target_angles);
 }
 
-void TestIkIncremental(void) {
-  float alpha=0;
-  vec3 leg_lengths;
-    for (float x=-5; x<5; x++) {
-      for (float y=-5; y<5; y++) {
-        for (float z=0; z<5; z++) {
-          for (float w=0; w<180; w+=30) {
-            for (int i=0; i<num_servos; i++) {
-              bp_rots[i][0] = x;
-              bp_rots[i][1] = y;
-              bp_rots[i][2] = z;
-              bp_rots[i][3] = DEG2RAD(w);
-              NormalizeQuaternion(bp_rots[i]);
+// void TestIkIncremental(void) {
+//   float alpha=0;
+//     for (float x=-5; x<5; x++) {
+//       for (float y=-5; y<5; y++) {
+//         for (float z=0; z<5; z++) {
+//           for (float w=0; w<180; w+=30) {
+//             for (int i=0; i<num_servos; i++) {
+//               bp_rots[i][0] = x;
+//               bp_rots[i][1] = y;
+//               bp_rots[i][2] = z;
+//               bp_rots[i][3] = DEG2RAD(w);
+//               NormalizeQuaternion(bp_rots[i]);
   
-              // Calculate effective leg length for each servo
-              CalcLegLength(eff_leg_lengths[i], bp_translations[i], bp_rots[i], servo_pcoords[i], servo_bcoords[i]);
-              PrintQuaternion(eff_leg_lengths[i], "eff_leg_lengths");
-              // Compute corresponding servo angle
-              alpha = CalcAlpha(eff_leg_lengths[i], betas[i]);
-              Serial.println(alpha);
-              target_angles[i] =  (int)RAD2DEG(alpha);
+//               // Calculate effective leg length for each servo
+//               CalcLegLength(eff_leg_lengths[i], bp_translations[i], bp_rots[i], servo_pcoords[i], servo_bcoords[i]);
+//               PrintQuaternion(eff_leg_lengths[i], "eff_leg_lengths");
+//               // Compute corresponding servo angle
+//               alpha = CalcAlpha(eff_leg_lengths[i], betas[i]);
+//               Serial.println(alpha);
+//               target_angles[i] =  (int)RAD2DEG(alpha);
   
-              Serial.println(y);
-              Serial.println(w);
-  //            printf("<x,y,z,w> = <%d,%d,%d,%d>\n", x*100, y*100, z*100, w*100);
-  //            printf("alpha[%d] = %d\n", i, target_angles[i]);
+//               Serial.println(y);
+//               Serial.println(w);
+//   //            printf("<x,y,z,w> = <%d,%d,%d,%d>\n", x*100, y*100, z*100, w*100);
+//   //            printf("alpha[%d] = %d\n", i, target_angles[i]);
               
-              Serial.print("alpha[");
-              Serial.print(i);
-              Serial.print("] = ");
-              Serial.println(target_angles[i]);
-              Serial.println();
-              delay(1000);
-            }
-          }
-        }
-      }
+//               Serial.print("alpha[");
+//               Serial.print(i);
+//               Serial.print("] = ");
+//               Serial.println(target_angles[i]);
+//               Serial.println();
+//               delay(1000);
+//             }
+//           }
+//         }
+//       }
+//   }
+// }
+
+void TestIkIncremental(void) {
+  int i =0;
+  float theta = 0.25;
+  bp_rots[0][0] = -0.71;
+  bp_rots[0][1] = -0.71;
+  bp_rots[0][2] = 0;
+  bp_rots[0][3] = cos(theta/2);;
+
+  for (int j=0; j<3; j++) {
+    bp_rots[0][j] = bp_rots[0][j] * sin(theta/2);
   }
-}
+  NormalizeQuaternion(bp_rots[i]);
 
-void TestIKRotation(void) {
-  vec3 leg_length;
-  vec3 xyz_angles = {DEG2RAD(0), DEG2RAD(15), DEG2RAD(0)};
-  CalcLegLength(leg_length, bp_translations, xyz_angles, servo_pcoords, servo_bcoords);
-  PrintVec3(leg_length);
-
-  float alpha = CalcAlpha(leg_length, betas[i]);
-  Serial.print("alpha: ");
+  // Calculate effective leg length for each servo
+  CalcLegLength(eff_leg_lengths[i], bp_translations[i], bp_rots[i], servo_pcoords[i], servo_bcoords[i]);
+  PrintQuaternion(eff_leg_lengths[i], "eff_leg_lengths");
+  // Compute corresponding servo angle
+  float alpha = CalcAlpha(eff_leg_lengths[i], betas[i]);
   Serial.println(alpha);
+  target_angles[i] =  (int)RAD2DEG(alpha);
+
+//  Serial.println(y);
+//  Serial.println(w);
+//            printf("<x,y,z,w> = <%d,%d,%d,%d>\n", x*100, y*100, z*100, w*100);
+//            printf("alpha[%d] = %d\n", i, target_angles[i]);
+  
+  Serial.print("alpha[");
+  Serial.print(i);
+  Serial.print("] = ");
+  Serial.println(target_angles[i]);
+  Serial.println();
+  delay(1000);
 }
+
+//void TestIKRotation(void) {
+//  vec3 leg_length;
+//  vec3 xyz_angles = {DEG2RAD(0), DEG2RAD(15), DEG2RAD(0)};
+//  CalcLegLength(leg_length, bp_translations, xyz_angles, servo_pcoords, servo_bcoords);
+//  PrintVec3(leg_length);
+//
+//  float alpha = CalcAlpha(leg_length, betas[i]);
+//  Serial.print("alpha: ");
+//  Serial.println(alpha);
+//}
 
 void NormalizeQuats(quat quats[num_servos]) {
   for (int i=0; i<num_servos; i++) {
@@ -129,9 +162,13 @@ void setup() {
 }
 
 void loop() {
-
-  TestIKRotation();
-  
+  quat result;
+  quat A = {1,2,3,4};
+  quat B = {5,6,7,8};
+  QuatMult(result, A,B);
+  PrintQuaternion(result, "Test quat mult");
+  // TestIKRotation();
+  TestIkIncremental();
   while(1) {
     
   }
