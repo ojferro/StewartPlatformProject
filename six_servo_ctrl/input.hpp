@@ -21,6 +21,6 @@ void init_input() {
 void read_joystick(int & x_pos, int & y_pos) {
     int x_raw = analogRead(JOYSTICK_PIN_X);
     int y_raw = analogRead(JOYSTICK_PIN_Y);
-    x_pos = map_smart(x_raw, 0, 1023, JOYSTICK_DELTA_HIGH_BOUND, JOYSTICK_LOW_BOUND);
-    y_pos = map_smart(y_raw, 0, 1023, JOYSTICK_DELTA_LOW_BOUND, JOYSTICK_HIGH_BOUND);
+    x_pos = map_smart(x_raw, 0, 1023, JOYSTICK_DELTA_HIGH_BOUND, JOYSTICK_DELTA_LOW_BOUND);
+    y_pos = map_smart(y_raw, 0, 1023, JOYSTICK_DELTA_LOW_BOUND,  JOYSTICK_DELTA_HIGH_BOUND);
 }

@@ -4,7 +4,6 @@
 /* --------------------------- Environment Setup ---------------------*/
 int x = 0;
 int y = 0;
-//int angles[num_servos] = {0};
 
 /* ------------------------ Main() Functions -----------------------*/
 
@@ -49,14 +48,11 @@ void control() {
     }
   }
 
-//  printf("Next Angles: ");
-//  print_array(angles, 6);
   move_motors(angles);
   for (int i = 0; i < 6; i++) {
     angles[i] = servos[i].read();
   }
-//  printf("Final Angles: ");
-//  print_array(angles, 6);
+
 }
 
 
@@ -66,6 +62,6 @@ void loop() {
   
   while(1) {
     control();
-    delay(5);//2000);
+    delay(5);
   }
 }
