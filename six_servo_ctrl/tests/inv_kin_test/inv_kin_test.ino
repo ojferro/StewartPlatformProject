@@ -104,9 +104,9 @@ void TestIkNeutral(void) {
 
 void TestIkIncremental(void) {
   int i =0;
-  float theta = 0.25;
-  bp_rots[0][0] = -0.71;
-  bp_rots[0][1] = -0.71;
+  float theta = 0.2;
+  bp_rots[0][0] = 1;
+  bp_rots[0][1] = 0;
   bp_rots[0][2] = 0;
   bp_rots[0][3] = cos(theta/2);;
 
@@ -120,7 +120,8 @@ void TestIkIncremental(void) {
   PrintQuaternion(eff_leg_lengths[i], "eff_leg_lengths");
   // Compute corresponding servo angle
   float alpha = CalcAlpha(eff_leg_lengths[i], betas[i]);
-  Serial.println(alpha);
+  Serial.print("alpha = ");
+  Serial.println(alpha,5);
   target_angles[i] =  (int)RAD2DEG(alpha);
 
 //  Serial.println(y);

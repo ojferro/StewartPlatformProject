@@ -13,7 +13,7 @@
 
 #define T_NEUTRAL_X 0
 #define T_NEUTRAL_Y 0
-#define T_NEUTRAL_Z 202 // Arbitrarily defined for now
+#define T_NEUTRAL_Z 185 // Arbitrarily defined for now
 
 #define SERVO_HORN_LENGTH 16.52
 #define ROD_LENGTH 190
