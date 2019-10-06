@@ -106,10 +106,10 @@ void TestIkIncremental(void) {
 void TestIKRotation(void) {
   vec3 leg_length;
   vec3 xyz_angles = {DEG2RAD(0), DEG2RAD(15), DEG2RAD(0)};
-  CalcLegLength(leg_length, bp_translations, xyz_angles, servo_pcoords, servo_bcoords);
-  PrintVec3(leg_length);
+  CalcLegLength(leg_length, bp_translations[0], xyz_angles, servo_pcoords[0], servo_bcoords[0]);
+  PrintVec3(leg_length, "Effective leg length");
 
-  float alpha = CalcAlpha(leg_length, betas[i]);
+  float alpha = CalcAlpha(leg_length, betas[0]);
   Serial.print("alpha: ");
   Serial.println(alpha);
 }
@@ -129,7 +129,7 @@ void setup() {
 }
 
 void loop() {
-
+  Serial.println(M_PI);
   TestIKRotation();
   
   while(1) {

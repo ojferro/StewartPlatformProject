@@ -124,7 +124,7 @@ void PrintVec3(vec3 v, char* log_message) {
     int i;
     Serial.print(log_message);
     Serial.print(" [");
-    for (i=0; i<4; i++) {
+    for (i=0; i<3; i++) {
         Serial.print(v[i]);
         Serial.print(", ");
     }
