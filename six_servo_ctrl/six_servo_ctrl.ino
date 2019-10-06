@@ -1,10 +1,9 @@
-#include "motor.hpp"
 #include "input.hpp"
 #include "print.hpp"
 
 /* --------------------------- Environment Setup ---------------------*/
-int x_pos = 0;
-int y_pos = 0;
+int x = 0;
+int y = 0;
 
 /* ------------------------ Main() Functions -----------------------*/
 
@@ -20,16 +19,50 @@ void setup() {
     setup_printf();
 }
 
-void loop() {
-  printf("Starting\r\n");
-  calibrate();
-  delay(2000);
+void control() {
+  read_joystick(x, y);
+  printf("Joystick: %03d -- %03d\r\n", x, y); 
+  int angles[6] = {90, 90, 90, 90, 90, 90};
 
-  printf("Moving Now\r\n");
-  int angles[6] = {90, 90, 90, 90, 165, 45};
+  { // Move Y
+    if (diff_error_bounds(y, 0) > 0) {
+      angles[servo_4] = middle_angle - y;
+      angles[servo_3] = middle_angle + y;
+    } else if (diff_error_bounds(y, 0) < 0) {
+      angles[servo_1] = middle_angle + y;
+      angles[servo_2] = middle_angle + y;
+      angles[servo_5] = middle_angle - y;
+      angles[servo_6] = middle_angle - y;
+    }
+  }
+  
+  { // Move X
+    if (diff_error_bounds(x, 0) < 0) {
+     angles[servo_1] = middle_angle - x;
+     angles[servo_2] = middle_angle - x;
+     angles[servo_3] = middle_angle + x;
+    } else if (diff_error_bounds(x, 0) > 0) {
+     angles[servo_4] = middle_angle - x;
+     angles[servo_5] = middle_angle + x;
+     angles[servo_6] = middle_angle + x;
+    }
+  }
+
   move_motors(angles);
+  
+  for (int i = 0; i < 6; i++) {
+    angles[i] = servos[i].read();
+  }
 
-  printf("Done\r\n");
+}
 
-  while(1) {}
+
+void loop() {
+  calibrate();  
+  delay(2000);
+  
+  while(1) {
+    control();
+    delay(5);
+  }
 }
