@@ -13,7 +13,7 @@
 
 #define T_NEUTRAL_X 0
 #define T_NEUTRAL_Y 0
-#define T_NEUTRAL_Z 20.2 // Arbitrarily defined for now
+#define T_NEUTRAL_Z 202 // Arbitrarily defined for now
 
 #define SERVO_HORN_LENGTH 16.52
 #define ROD_LENGTH 190
@@ -165,6 +165,9 @@ void CalcLegLength(vec3 result, vec3 T, vec3 xyz_angles, vec3 p_k, vec3 b_k) {
 
     float rot_p_k_vec[3];
     MatMult(rot_p_k_vec, rot_mat, p_k);
+
+    PrintVec3(p_k, "P_k");
+    PrintVec3(rot_p_k_vec, "ROT MAT P_K Multiplied");
 
     for (int i=0; i<3; i++) {
         result[i] = rot_p_k_vec[i] + T[i] - b_k[i];
