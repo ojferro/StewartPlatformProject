@@ -68,30 +68,62 @@ def inv_kin():
     d_ln = 190
     #Servo horn length
     h_ln = 16.52
-
-    beta_k = 0
-
-    p_k=np.array([-44.68, -51.78, 0])
-    b_k=np.array([-30.0, -86.75, 0])
-
-    neutral_T=np.array([0, 0, 202])
+    neutral_T=np.array([0, 0, 185])
 
     translation=np.array([0,0,0])
 
-    q_params = get_quat(0.25, 0, 0)
-    qt = Quaternion(q_params).normalised
+    
+    b_k_list = np.array([
+        [-30.0, -86.75, 0],
+        [-90.13, 17.4, 0], 
+        [-60.13, 69.36, 0],
+        [60.13, 69.36, 0],
+        [90.13, 17.4, 0],
+        [30, -86.75, 0]
+        ])
+    #Position of joints on platform relative to Op
+    #must have z-value of 0
+    p_k_list = np.array([
+        [-44.68, -51.78, 0],
+        [-67.18, -12.8, 0],
+        [-22.5, 64.58, 0],
+        [22.5, 64.58, 0],
+        [67.18, -12.8, 0],
+        [44.68, -51.78, 0]
+        ])
 
-    l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
-    print("l_k={}".format(l_k))
-    l_k_len = np.linalg.norm(l_k)
+    #Angles of servo horn w.r.t. horizontnal about z axis
+    beta_k_list = np.array([
+        0,
+        240,
+        240,
+        120,
+        120,
+        0
+        ])
+    beta_k_list*(math.pi/180.0)
+    
+    for i, (p_k, b_k, beta_k) in enumerate(zip(p_k_list, b_k_list, beta_k_list)):
+        # beta_k = 0
+        # p_k=np.array([-44.68, -51.78, 0])
+        # b_k=np.array([-30.0, -86.75, 0])
+        print([p_k, b_k, beta_k])
 
-    e_k = 2*h_ln*l_k[2]
-    f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
-    g_k = (l_k_len**2 - ((d_ln)**2 - (h_ln)**2))
+        q_params = get_quat(0.205, 0, 0)
+        qt = Quaternion(q_params).normalised
+
+        l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
+        l_k_len = np.linalg.norm(l_k)
+        print("l_k={}, length={}".format(l_k, l_k_len))
+
+        e_k = 2*h_ln*l_k[2]
+        f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
+        g_k = (l_k_len**2 - ((d_ln)**2 - (h_ln)**2))
 
 
-    alpha_k_rad = math.asin(g_k/math.sqrt((e_k)**2 + (f_k)**2)) - math.atan2(f_k, e_k)
-    alpha_k_deg = math.degrees(alpha_k_rad)
+        alpha_k_rad = math.asin(g_k/math.sqrt((e_k)**2 + (f_k)**2)) - math.atan2(f_k, e_k)
+        alpha_k_deg = math.degrees(alpha_k_rad)
+        print("Alpha {} : {}".format(i,alpha_k_deg))
 
     return alpha_k_deg
 
