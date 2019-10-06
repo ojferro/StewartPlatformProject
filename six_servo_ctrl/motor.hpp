@@ -11,6 +11,8 @@
 #define functional_angle_max    175
 #define functional_angle_min    5
 
+#define ERROR_BOUNDS            2
+
 // Ramp Movement Delay Parameters (NOT USING RIGHT NOW)
 #define mvmt_delay_min            2   // ms
 #define mvmt_delay_max            30  // ms
@@ -47,6 +49,10 @@ void print_angles() {
   for (int servo = servo_1; servo < num_servos; servo++) {
     printf("Servo: %d - Angle: %d\r\n", servo, servos[servo].read());
   }
+}
+
+int diff_error_bounds(int angle, int reference) {
+  return (abs(angle - reference) > ERROR_BOUNDS) ? (angle-reference) : 0;
 }
 
 /* --------------------------- Motor Actuation Functions ------------------------------*/
@@ -106,7 +112,6 @@ void drive_motors(int target_angles[num_servos], int delay_time_ms[num_servos], 
         // If reached target angle for this servo, turn off the bit
         if (current_angle == target_angles[servo]) { // done
           motor_moving &= ~(1 << servo);
-//          printf("Servo: %d Done Time: %d\r\n", servo, millis());
         }
       }
     }
@@ -166,7 +171,7 @@ bool move_motors(int target_angles[num_servos]) {
   
   for (int servo = 0; servo < num_servos; servo++) {
     if (servo == slowest_servo) { // Use the existing max speed of slowest servo
-      delay_time[servo] = 1; // min d = 1;
+      delay_time[servo] = int(error[servo] != 0); // min d = 1;
     } else if (error[servo] == 0) { 
       delay_time[servo] = 0; // No movement required for this motor
     } else { // Compute the slower w of each of the remaining motors
@@ -175,6 +180,7 @@ bool move_motors(int target_angles[num_servos]) {
     }
   }
 
+//  print_array(delay_time, 6);
   drive_motors(target_angles, delay_time, mvmt_direction);  
   return true;
 }
