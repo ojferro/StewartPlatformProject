@@ -49,6 +49,7 @@ void control() {
   }
 
   move_motors(angles);
+  
   for (int i = 0; i < 6; i++) {
     angles[i] = servos[i].read();
   }

@@ -5,18 +5,24 @@
 #define mechanical_angle_max    175
 #define mechanical_angle_min    5
 
-// Center Angle
-#define middle_angle            90
-
 #define functional_angle_max    175
 #define functional_angle_min    5
 
+// Center Angle
+#define middle_angle            90
+
+// Other Operating Parameters
+#define MINIMUM_DELAY           5
 #define ERROR_BOUNDS            2
 
 // Ramp Movement Delay Parameters (NOT USING RIGHT NOW)
 #define mvmt_delay_min            2   // ms
 #define mvmt_delay_max            30  // ms
 #define ramp_distance_percentage  0.4 // %
+
+// Delay & Velocity Mapping Constants -- V = a / (d ^ r)
+#define a   1
+#define r   1
 
 // Pins are offset from their array mapping to their PWM pin mapping
 #define servo_pin_offset  2
@@ -128,6 +134,14 @@ int map_velocity_to_delay(float omega) {
   }
 }
 
+float map_delay_to_velocity(int delay_ms) {
+  if (delay_ms == 0) {
+    return 0;
+  } else {
+    return 1.0 / float(delay_ms);
+  }
+}
+
 /* --------------------------- Motor Control & Logic Functions ------------------------------*/
 
 
@@ -155,7 +169,7 @@ bool move_motors(int target_angles[num_servos]) {
     
     error[servo] = (target_angles[servo] - servos[servo].read());
     mvmt_direction[servo] = (error[servo] < 0) ? -1 : 1;
-    travel_time = (abs(error[servo]) / 1); // V = 1 / d, min d = 1 -> Vmax = 1
+    travel_time = (abs(error[servo]) / map_delay_to_velocity(MINIMUM_DELAY)); // V = 1 / d, min d = 1 -> Vmax = 1
 
     // Get the slowest motor
     if (travel_time > max_travel_time) {
