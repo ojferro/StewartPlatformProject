@@ -102,6 +102,11 @@ void TestIkNeutral(void) {
 //   }
 // }
 
+void GetJointAngles(int angle_x, int angle_y) {
+  float theta = sqrt(angle_x*angle_x + angle_y*angle_y);
+  
+}
+
 void TestIkIncremental(void) {
   int i =0;
   float theta = 0.2;
