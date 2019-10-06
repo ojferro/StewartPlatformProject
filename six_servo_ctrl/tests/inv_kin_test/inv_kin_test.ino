@@ -65,6 +65,7 @@ void TestIkNeutral(void) {
 
 void TestIkIncremental(void) {
   float alpha=0;
+  vec3 leg_lengths;
     for (float x=-5; x<5; x++) {
       for (float y=-5; y<5; y++) {
         for (float z=0; z<5; z++) {
@@ -102,6 +103,17 @@ void TestIkIncremental(void) {
   }
 }
 
+void TestIKRotation(void) {
+  vec3 leg_length;
+  vec3 xyz_angles = {DEG2RAD(0), DEG2RAD(15), DEG2RAD(0)};
+  CalcLegLength(leg_length, bp_translations, xyz_angles, servo_pcoords, servo_bcoords);
+  PrintVec3(leg_length);
+
+  float alpha = CalcAlpha(leg_length, betas[i]);
+  Serial.print("alpha: ");
+  Serial.println(alpha);
+}
+
 void NormalizeQuats(quat quats[num_servos]) {
   for (int i=0; i<num_servos; i++) {
     NormalizeQuaternion(quats[i]);
@@ -118,7 +130,7 @@ void setup() {
 
 void loop() {
 
-  TestIkIncremental();
+  TestIKRotation();
   
   while(1) {
     
