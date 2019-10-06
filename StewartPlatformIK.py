@@ -29,14 +29,18 @@ def q_mult(quaternion0, quaternion1):
 def norm_vec3(vec):
     return np.sqrt(vec[0]**2 + vec[1]**2 + vec[2]**2)
 
+def norm_vec4(vec):
+    return np.sqrt(vec[0]**2 + vec[1]**2 + vec[2]**2+vec[3]**2)
+
 def conjugate(q):
     q_inv = np.array(q[:-1])*-1
     q_inv = np.append(q_inv, q[-1])
     return q_inv
 
 theta = 0.25 #in rad
-R=np.array([-0.71, -0.71, 0])
-R = np.append((R/norm_vec3(R))*math.sin(theta/2), math.cos(theta/2))
+R=np.array([-0.71, -0.71, 0])*math.sin(theta/2)
+R = np.append(R, math.cos(theta/2))
+R = R/norm_vec4(R)
 print("R={}".format(R))
 print("THING!!! {}".format(q_mult([1,2,3,4],[5,6,7,8])))
 p_k=[-44.68, -51.78, 0, 0]
