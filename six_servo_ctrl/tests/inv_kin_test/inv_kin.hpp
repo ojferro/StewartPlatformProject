@@ -70,15 +70,16 @@ quat bp_translations[num_servos] = {
     {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0}
 };
 
-// Defines rotation from base to platform
-quat bp_rots[num_servos] = {
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W}
-};
+// Defines rotation from base to platform. Only one quaternion is needed because the rotation matrix will be same for all servos
+quat bp_rot = {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W};
+// quat bp_rots[num_servos] = {
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W}
+// };
 
 void QuatMult(quat r, quat A, quat B){
     r[0] = B[0] * A[3] - B[1] * A[2] + B[2] * A[1] + B[3] * A[0];
