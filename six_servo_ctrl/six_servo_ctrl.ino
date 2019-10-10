@@ -44,7 +44,7 @@ void control() {
     } else if (diff_error_bounds(x, 0) > 0) {
      angles[servo_4] = middle_angle - x;
      angles[servo_5] = middle_angle + x;
-     angles[servo_6] = middle_angle + x;
+     angles[servo_6] = middle_angle - x; // Turned down
     }
   }
 

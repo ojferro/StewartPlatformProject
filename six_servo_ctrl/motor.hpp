@@ -5,14 +5,14 @@
 #define mechanical_angle_max    175
 #define mechanical_angle_min    5
 
-#define functional_angle_max    175
-#define functional_angle_min    5
+#define functional_angle_max    120
+#define functional_angle_min    60
 
 // Center Angle
 #define middle_angle            90
 
 // Other Operating Parameters
-#define MINIMUM_DELAY           5
+#define MINIMUM_DELAY           15
 #define ERROR_BOUNDS            2
 
 // Ramp Movement Delay Parameters (NOT USING RIGHT NOW)
@@ -51,6 +51,7 @@ bool angle_in_bounds(int target_angle) {
   return ((target_angle < mechanical_angle_max) && (target_angle > mechanical_angle_min) &&
           (target_angle < functional_angle_max) && (target_angle > functional_angle_min));
 }
+
 void print_angles() {
   for (int servo = servo_1; servo < num_servos; servo++) {
     printf("Servo: %d - Angle: %d\r\n", servo, servos[servo].read());
@@ -76,6 +77,7 @@ int write_servo_delta(servos_idx_e servo, int delta) {
   return servos[servo].read();
 }
 
+/*
 void simple_ramp(servos_idx_e servo, int target_angle) {
   int original_angle = servos[servo].read();
   int current_angle = original_angle;
@@ -95,6 +97,7 @@ void simple_ramp(servos_idx_e servo, int target_angle) {
     delay(delay_time);
   }
 }
+*/
 
 void drive_motors(int target_angles[num_servos], int delay_time_ms[num_servos], int mvmt_direction[num_servos]) {
   uint8_t motor_moving = 0;
@@ -144,15 +147,6 @@ float map_delay_to_velocity(int delay_ms) {
 
 /* --------------------------- Motor Control & Logic Functions ------------------------------*/
 
-
-void calibrate() {
-  for(int servo = servo_1; servo < num_servos; servo++) {
-    servos[servo].write(90);
-  }
-  print_angles();
-}
-
-
 bool move_motors(int target_angles[num_servos]) {
   int error[num_servos] = {0};
   int mvmt_direction[num_servos] = {0};
@@ -185,7 +179,7 @@ bool move_motors(int target_angles[num_servos]) {
   
   for (int servo = 0; servo < num_servos; servo++) {
     if (servo == slowest_servo) { // Use the existing max speed of slowest servo
-      delay_time[servo] = int(error[servo] != 0); // min d = 1;
+      delay_time[servo] = (error[servo] == 0) ? 0 : MINIMUM_DELAY; // min d = 1;
     } else if (error[servo] == 0) { 
       delay_time[servo] = 0; // No movement required for this motor
     } else { // Compute the slower w of each of the remaining motors
@@ -194,6 +188,18 @@ bool move_motors(int target_angles[num_servos]) {
     }
   }
 
+  printf("Delays: ");
+  print_array(delay_time, 6);
+
   drive_motors(target_angles, delay_time, mvmt_direction);  
   return true;
+}
+
+void calibrate() {
+  int calib[6] = {90, 90, 90, 90, 90, 90};
+  move_motors(calib);
+//  for(int servo = servo_1; servo < num_servos; servo++) {
+//    servos[servo].write(90);
+//  }
+  print_angles();
 }

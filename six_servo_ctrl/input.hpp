@@ -7,8 +7,8 @@
 #define Y_NEUTRAL         511
 #define BIN_BOUNDS        2
 
-#define JOYSTICK_DELTA_LOW_BOUND     -80
-#define JOYSTICK_DELTA_HIGH_BOUND     80
+#define JOYSTICK_DELTA_LOW_BOUND     -15
+#define JOYSTICK_DELTA_HIGH_BOUND     15
 
 long map_smart(long x, long in_min, long in_max, long out_min, long out_max) {
   return round(((x - in_min) * (out_max - out_min)) / float(in_max - in_min)) + out_min;
