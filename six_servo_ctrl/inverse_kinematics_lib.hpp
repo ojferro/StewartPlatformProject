@@ -1,6 +1,3 @@
-#include <Servo.h>
-#include "linmath.h"
-#include "motor.hpp"
 #include "inv_kin.hpp"
 
 #include <Arduino.h>
@@ -42,5 +39,4 @@ void NormalizeQuats(quat quats[num_servos]) {
   for (int i=0; i<num_servos; i++) {
     NormalizeQuaternion(quats[i]);
   }
-}
 }

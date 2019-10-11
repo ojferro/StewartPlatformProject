@@ -1,5 +1,3 @@
-#include "motor.hpp"
-
 #define JOYSTICK_PIN_X    0
 #define JOYSTICK_PIN_Y    1
 

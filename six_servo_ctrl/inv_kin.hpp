@@ -2,6 +2,7 @@
 #define INV_KIN_HPP
 
 #include "linmath.h"
+#include "motor.hpp"
 
 #define DEG2RAD(degree) (degree*M_PI/180.0)
 #define RAD2DEG(radian) (radian*180.0/M_PI)
@@ -13,10 +14,10 @@
 
 #define T_NEUTRAL_X 0
 #define T_NEUTRAL_Y 0
-#define T_NEUTRAL_Z 10 // Arbitrarily defined for now
+#define T_NEUTRAL_Z 185 // Arbitrarily defined for now
 
 #define SERVO_HORN_LENGTH 16.52
-#define ROD_LENGTH 147.395
+#define ROD_LENGTH 190
 
 // Servo horn rotations at build time (beta_k) in RADIANS
 float betas[num_servos] = {
@@ -70,41 +71,68 @@ quat bp_translations[num_servos] = {
     {T_NEUTRAL_X, T_NEUTRAL_Y, T_NEUTRAL_Z, 0}
 };
 
-// Defines rotation from base to platform
-quat bp_rots[num_servos] = {
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
-    {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W}
-};
+// Defines rotation from base to platform. Only one quaternion is needed because the rotation matrix will be same for all servos
+quat bp_rot = {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W};
+// quat bp_rots[num_servos] = {
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W},
+//     {R_NEUTRAL_X, R_NEUTRAL_Y, R_NEUTRAL_Z, R_NEUTRAL_W}
+// };
 
-/* 
-    Calculates l_k (effective leg length) from base to platform
-    @params
-    r: return value
-    T: Vector (pure quaternion) defining translation from base to platform
-    R: Quaternion defining rotation from base to platform
-    p_k: Vector (pure quaternion) defining location of servo base wrt base origin
-    b_k: Vector (pure quaternion) defining location of servo platform wrt platform origin
-*/
-void CalcLegLength(quat r, quat T, quat R, quat p_k, quat b_k) {
-    // Inverse of a quaternion is its conjugate
-    quat R_inv; 
-    quat_conj(R_inv, R);
+void QuatMult(quat r, quat A, quat B){
+    r[0] = B[0] * A[3] - B[1] * A[2] + B[2] * A[1] + B[3] * A[0];
+    r[1] = B[0] * A[2] + B[1] * A[3] - B[2] * A[0] + B[3] * A[1];
+    r[2] = -B[0] * A[1] + B[1] * A[0] + B[2] * A[3] + B[3] * A[2];
+    r[3] = -B[0] * A[0] - B[1] * A[1] - B[2] * A[2] + B[3] * A[3];
+//    r3 = -x2*y1 + y2*x1 + z2*w1 + w2*z1
+//    z = w1z2 + x1y2 - y1x2 + z1w2
+}
 
-    // R X p_k
-    quat_mul(r, R, p_k);
+float DotProd(float v1[], float v2[]){
+    return (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]);
+}
 
-    // (R X p_k) X R_inv
-    quat_mul(r, r, R_inv);
+void MatMult(float result[3], float mat[3][3], float vec[3]){
+    for (int i =0; i<3;  i++){
+        result[i] = DotProd(mat[i],vec);
+    }
+}
 
-    // T + [(R X p_k) X R_inv]
-    quat_add(r, T, r);
+void CreateRotMat(float result [3][3], float phi, float theta, float tri){
+    result[0][0] = cos(tri)*cos(theta);
+    result[0][1] = -sin(tri)*cos(phi)+cos(tri)*sin(theta)*sin(phi);
+    result[0][2] = sin(tri)*sin(phi)+cos(tri)*sin(theta)*cos(phi);
+    result[1][0] = sin(tri)*cos(theta);
+    result[1][1] = cos(tri)*cos(phi)+sin(tri)*sin(theta)*sin(phi);
+    result[1][2] = -cos(tri)*sin(phi)+sin(tri)*sin(theta)*cos(phi);
+    result[2][0] = -sin(theta);
+    result[2][1] = cos(theta)*sin(phi);
+    result[2][2] = cos(theta)*cos(phi);
+}
 
-    // T + [(R X p_k) X R_inv] - b_k
-    quat_sub(r, r, b_k);
+void PrintQuaternion(quat q, char* log_message) {
+//    int i;
+//    Serial.print(log_message);
+//    Serial.print(" [");
+//    for (i=0; i<4; i++) {
+//        Serial.print(q[i],5);
+//        Serial.print(", ");
+//    }
+//    Serial.println("]");
+}
+
+void PrintVec3(vec3 v, char* log_message) {
+//    int i;
+//    Serial.print(log_message);
+//    Serial.print(" [");
+//    for (i=0; i<3; i++) {
+//        Serial.print(v[i]);
+//        Serial.print(", ");
+//    }
+//    Serial.println("]");
 }
 
 // Calculates L2 norm (magnitude) for a given quaternion/vector
@@ -117,18 +145,96 @@ float CalcL2Norm(quat q) {
     return sqrt(result);
 }
 
+void NormalizeQuaternion(quat R) {
+  float norm_R = CalcL2Norm(R);
+
+  for (int i=0; i<4; i++) {
+    R[i] = R[i]/norm_R;
+  }
+}
+
+/* 
+    Calculates l_k (effective leg length) from base to platform
+    @params
+    r: return value
+    T: Vector (pure quaternion) defining translation from base to platform
+    R: Quaternion defining rotation from base to platform
+    p_k: Vector (pure quaternion) defining location of servo base wrt base origin
+    b_k: Vector (pure quaternion) defining location of servo platform wrt platform origin
+*/
+
+// void CalcLegLength(vec3 result, vec3 T, vec3 xyz_angles, vec3 p_k, vec3 b_k) {
+//     float rot_mat[3][3];
+//     CreateRotMat(rot_mat, xyz_angles[0], xyz_angles[1], xyz_angles[2]);
+
+//     float rot_p_k_vec[3];
+//     MatMult(rot_p_k_vec, rot_mat, p_k);
+
+//     for (int i=0; i<3; i++) {
+//         result[i] = rot_p_k_vec[i] + T[i] - b_k[i];
+//     }
+// }
+
+void CalcLegLength(quat r, quat T, quat R, quat p_k, quat b_k) {
+    quat temp;
+    PrintQuaternion(r, "result");
+    PrintQuaternion(T, "T");
+    PrintQuaternion(R, "R");
+    PrintQuaternion(p_k, "p_k");
+    PrintQuaternion(b_k, "b_k");
+    // Inverse of a quaternion is its conjugate
+    quat R_inv; 
+    quat_conj(R_inv, R);
+    PrintQuaternion(R_inv, "R_inv");
+
+    // R X p_k
+    QuatMult(temp, R, p_k);
+    PrintQuaternion(temp, "R X p_k");
+
+    quat temp2;
+
+    // (R X p_k) X R_inv
+    QuatMult(temp2, temp, R_inv);
+    PrintQuaternion(temp2, "(R X p_k) X R_inv");
+
+    // T + [(R X p_k) X R_inv]
+    quat temp3;
+    quat_add(temp3, T, temp2);
+    PrintQuaternion(temp3, "T + [(R X p_k) X R_inv]");
+    quat ans;
+    // T + [(R X p_k) X R_inv] - b_k
+    quat_sub(ans, temp3, b_k);
+    PrintQuaternion(ans, "T + [(R X p_k) X R_inv] - b_k");
+
+    for (int i=0; i<4; i++) {
+      r[i] = ans[i];
+    }
+}
+
 // Calculates servo rotation angle (alpha_k) in RADIANS
 float CalcAlpha(quat l_k, float B_k) {
     // Calculate e_k = 2*|h|*l_k[z]
     float e_k = 2*h*l_k[2];
+//    Serial.print("e_k: ");
+//    Serial.println(e_k,5);
 
     float f_k = 2*h*(cos(B_k)*l_k[0] + sin(B_k)*l_k[1]);
+//    Serial.print("f_k: ");
+//    Serial.println(f_k,5);
 
     // g_k = |l_k|^2 - (|d|^2 - |h|^2)
-    float g_k = CalcL2Norm(l_k);
-    g_k = g_k*g_k - (d*d - h*h);
+    float l_norm = CalcL2Norm(l_k);
+//    Serial.print("Norm l_k: ");
+//    Serial.println(l_norm,5);
+    float g_k = l_norm*l_norm - (d*d - h*h);
+//    Serial.print("g_k: ");
+//    Serial.println(g_k,5);
 
     // Calculate and return alpha_k
+//    Serial.print("Sqrt term: ");
+//    Serial.println(sqrt(e_k*e_k + f_k*f_k),5);
+//    Serial.print("atan2 term: ");
+//    Serial.println(atan2(f_k, e_k),5);
     return asin(g_k/(sqrt(e_k*e_k + f_k*f_k))) - atan2(f_k, e_k);
 }
 

@@ -1,5 +1,7 @@
 #include "input.hpp"
 #include "print.hpp"
+//#include "motor.hpp"
+#include "inverse_kinematics_lib.hpp"
 
 /* --------------------------- Environment Setup ---------------------*/
 int x = 0;
@@ -44,7 +46,7 @@ void control() {
     } else if (diff_error_bounds(x, 0) > 0) {
      angles[servo_4] = middle_angle - x;
      angles[servo_5] = middle_angle + x;
-     angles[servo_6] = middle_angle + x;
+     angles[servo_6] = middle_angle - x; // Turned down
     }
   }
 
@@ -60,9 +62,19 @@ void control() {
 void loop() {
   calibrate();  
   delay(2000);
+
+//  read_joystick(x,y);
+
+  printf("Initial IK angles \t");
+  print_array(target_angles, 6);
   
-  while(1) {
-    control();
-    delay(5);
-  }
+  GetJointAngles(DEG2RAD(10), 0, 0);
+  
+  printf("Target IK Angles \t");
+  print_array(target_angles, 6);
+
+//  int angles[6] = {90, 90, 90, 90, 90, 90};
+  move_motors_from_IK(target_angles);
+  print_angles();
+  while(1){}
 }
