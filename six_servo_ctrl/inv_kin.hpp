@@ -177,34 +177,26 @@ void NormalizeQuaternion(quat R) {
 
 void CalcLegLength(quat r, quat T, quat R, quat p_k, quat b_k) {
     quat temp;
-    PrintQuaternion(r, "result");
-    PrintQuaternion(T, "T");
-    PrintQuaternion(R, "R");
-    PrintQuaternion(p_k, "p_k");
-    PrintQuaternion(b_k, "b_k");
+
     // Inverse of a quaternion is its conjugate
     quat R_inv; 
     quat_conj(R_inv, R);
-    PrintQuaternion(R_inv, "R_inv");
 
     // R X p_k
     QuatMult(temp, R, p_k);
-    PrintQuaternion(temp, "R X p_k");
 
     quat temp2;
 
     // (R X p_k) X R_inv
     QuatMult(temp2, temp, R_inv);
-    PrintQuaternion(temp2, "(R X p_k) X R_inv");
 
     // T + [(R X p_k) X R_inv]
     quat temp3;
     quat_add(temp3, T, temp2);
-    PrintQuaternion(temp3, "T + [(R X p_k) X R_inv]");
+
     quat ans;
     // T + [(R X p_k) X R_inv] - b_k
     quat_sub(ans, temp3, b_k);
-    PrintQuaternion(ans, "T + [(R X p_k) X R_inv] - b_k");
 
     for (int i=0; i<4; i++) {
       r[i] = ans[i];
@@ -215,26 +207,14 @@ void CalcLegLength(quat r, quat T, quat R, quat p_k, quat b_k) {
 float CalcAlpha(quat l_k, float B_k) {
     // Calculate e_k = 2*|h|*l_k[z]
     float e_k = 2*h*l_k[2];
-//    Serial.print("e_k: ");
-//    Serial.println(e_k,5);
 
     float f_k = 2*h*(cos(B_k)*l_k[0] + sin(B_k)*l_k[1]);
-//    Serial.print("f_k: ");
-//    Serial.println(f_k,5);
 
     // g_k = |l_k|^2 - (|d|^2 - |h|^2)
     float l_norm = CalcL2Norm(l_k);
-//    Serial.print("Norm l_k: ");
-//    Serial.println(l_norm,5);
     float g_k = l_norm*l_norm - (d*d - h*h);
-//    Serial.print("g_k: ");
-//    Serial.println(g_k,5);
 
     // Calculate and return alpha_k
-//    Serial.print("Sqrt term: ");
-//    Serial.println(sqrt(e_k*e_k + f_k*f_k),5);
-//    Serial.print("atan2 term: ");
-//    Serial.println(atan2(f_k, e_k),5);
     return asin(g_k/(sqrt(e_k*e_k + f_k*f_k))) - atan2(f_k, e_k);
 }
 
