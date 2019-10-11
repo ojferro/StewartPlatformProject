@@ -1,12 +1,19 @@
 #include <Servo.h>
 #include <Arduino.h>
 
-// Servo movement limits in degrees
-#define mechanical_angle_max    175
-#define mechanical_angle_min    5
+/* --------------------- Data Definitions -----------------------*/
 
-#define functional_angle_max    120
-#define functional_angle_min    60
+// Servo movement limits in degrees
+#define mechanical_angle_max    180
+#define mechanical_angle_min    0
+
+// Servo Functional Limits Index (more readable code)
+#define max_limit               1
+#define min_limit               0
+
+// Inverse Kinematic Reference Conversion Parameters
+#define ik_angle_max            90
+#define ik_angle_min           -45
 
 // Center Angle
 #define middle_angle            90
@@ -20,12 +27,10 @@
 #define mvmt_delay_max            30  // ms
 #define ramp_distance_percentage  0.4 // %
 
-// Delay & Velocity Mapping Constants -- V = a / (d ^ r)
-#define a   1
-#define r   1
-
 // Pins are offset from their array mapping to their PWM pin mapping
 #define servo_pin_offset  2
+
+/*----------------- Data Declarations -------------------------------*/
 
 typedef enum {
   servo_1 = 0,
@@ -37,8 +42,12 @@ typedef enum {
   num_servos
 } servos_idx_e;
 
-// Directly included in other files
-Servo servos[num_servos];  
+Servo servos[num_servos];
+int conversion_polarity[num_servos] = {-1, +1, -1, +1, -1, +1};
+int functional_limits[num_servos][2] = 
+{ {0, 135}, {45, 180}, {0, 135}, {45, 180}, {0, 135}, {45, 180} };
+
+/* ----------------- Helper Functions ---------------------------------*/ 
 
 void print_array(int arr[], int num) {
   for (int i = 0; i < num; i++) {
@@ -47,9 +56,10 @@ void print_array(int arr[], int num) {
   printf("\r\n");
 }
 
-bool angle_in_bounds(int target_angle) {
-  return ((target_angle < mechanical_angle_max) && (target_angle > mechanical_angle_min) &&
-          (target_angle < functional_angle_max) && (target_angle > functional_angle_min));
+// Returns true if angle is good
+bool angle_in_bounds(int target_angle, int servo) {
+  return ((target_angle <= functional_limits[servo][max_limit]) && (target_angle >= functional_limits[servo][min_limit]) &&
+          (target_angle <= mechanical_angle_max) && (target_angle >= mechanical_angle_min));
 }
 
 void print_angles() {
@@ -66,7 +76,7 @@ int diff_error_bounds(int angle, int reference) {
 
 void write_servo_position(servos_idx_e servo, int target_angle) {
   // Ensure target angle within mechanical & functional limits
-  if  (angle_in_bounds(target_angle)) {
+  if  (angle_in_bounds(target_angle, servo)) {
         servos[servo].write(target_angle);
   }
 }
@@ -157,7 +167,8 @@ bool move_motors(int target_angles[num_servos]) {
   // Find distances & times for each motor given target
   for (int servo = 0; servo < num_servos; servo++) {
     // Return early if any angles are bad
-    if (!angle_in_bounds(target_angles[servo])) {
+    if (!angle_in_bounds(target_angles[servo], servo)) {
+      printf("Invalid angle %d passed for servo %d (0-indexed!!!) to move_motors", target_angles[servo], servo);
       return false;
     }
     
@@ -195,11 +206,28 @@ bool move_motors(int target_angles[num_servos]) {
   return true;
 }
 
+void move_motors_from_IK(int alpha[num_servos]) {
+  int theta[num_servos] = {0};
+  
+  for (int servo = servo_1; servo < num_servos; servo++) {
+    if (alpha[servo] > ik_angle_max || alpha[servo] < ik_angle_min) {
+      printf("Invalid Angle %d for servo %d passed from IK (0-indexed!!!!)\r\n", alpha[servo], servo);
+      return;
+    }
+
+    theta[servo] = 90 + (conversion_polarity[servo]*alpha[servo]);
+  }
+
+  printf("Given alpha = ");
+  print_array(alpha, 6);
+  printf("Converted to ");
+  print_array(theta, 6);
+
+  move_motors(theta);
+}
+
 void calibrate() {
   int calib[6] = {90, 90, 90, 90, 90, 90};
   move_motors(calib);
-//  for(int servo = servo_1; servo < num_servos; servo++) {
-//    servos[servo].write(90);
-//  }
   print_angles();
 }
