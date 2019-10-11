@@ -163,41 +163,30 @@ void NormalizeQuaternion(quat R) {
     b_k: Vector (pure quaternion) defining location of servo platform wrt platform origin
 */
 
-// void CalcLegLength(vec3 result, vec3 T, vec3 xyz_angles, vec3 p_k, vec3 b_k) {
-//     float rot_mat[3][3];
-//     CreateRotMat(rot_mat, xyz_angles[0], xyz_angles[1], xyz_angles[2]);
-
-//     float rot_p_k_vec[3];
-//     MatMult(rot_p_k_vec, rot_mat, p_k);
-
-//     for (int i=0; i<3; i++) {
-//         result[i] = rot_p_k_vec[i] + T[i] - b_k[i];
-//     }
-// }
-
 void CalcLegLength(quat r, quat T, quat R, quat p_k, quat b_k) {
-    quat temp;
+    quat step1;
 
     // Inverse of a quaternion is its conjugate
-    quat R_inv; 
+    quat R_inv;
     quat_conj(R_inv, R);
 
     // R X p_k
-    QuatMult(temp, R, p_k);
+    QuatMult(step1, R, p_k);
 
-    quat temp2;
+    quat step2;
 
     // (R X p_k) X R_inv
-    QuatMult(temp2, temp, R_inv);
+    QuatMult(step2, step1, R_inv);
 
     // T + [(R X p_k) X R_inv]
-    quat temp3;
-    quat_add(temp3, T, temp2);
+    quat step3;
+    quat_add(step3, T, step2);
 
     quat ans;
     // T + [(R X p_k) X R_inv] - b_k
-    quat_sub(ans, temp3, b_k);
+    quat_sub(ans, step3, b_k);
 
+    // Store answer in return array
     for (int i=0; i<4; i++) {
       r[i] = ans[i];
     }
