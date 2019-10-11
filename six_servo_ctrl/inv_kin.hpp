@@ -114,25 +114,25 @@ void CreateRotMat(float result [3][3], float phi, float theta, float tri){
 }
 
 void PrintQuaternion(quat q, char* log_message) {
-//    int i;
-//    Serial.print(log_message);
-//    Serial.print(" [");
-//    for (i=0; i<4; i++) {
-//        Serial.print(q[i],5);
-//        Serial.print(", ");
-//    }
-//    Serial.println("]");
+   int i;
+   Serial.print(log_message);
+   Serial.print(" [");
+   for (i=0; i<4; i++) {
+       Serial.print(q[i],5);
+       Serial.print(", ");
+   }
+   Serial.println("]");
 }
 
 void PrintVec3(vec3 v, char* log_message) {
-//    int i;
-//    Serial.print(log_message);
-//    Serial.print(" [");
-//    for (i=0; i<3; i++) {
-//        Serial.print(v[i]);
-//        Serial.print(", ");
-//    }
-//    Serial.println("]");
+   int i;
+   Serial.print(log_message);
+   Serial.print(" [");
+   for (i=0; i<3; i++) {
+       Serial.print(v[i]);
+       Serial.print(", ");
+   }
+   Serial.println("]");
 }
 
 // Calculates L2 norm (magnitude) for a given quaternion/vector
