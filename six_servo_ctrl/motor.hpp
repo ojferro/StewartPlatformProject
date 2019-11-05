@@ -19,7 +19,7 @@
 #define middle_angle            90
 
 // Other Operating Parameters
-#define MINIMUM_DELAY           15
+#define MINIMUM_DELAY           17
 #define ERROR_BOUNDS            2
 
 // Ramp Movement Delay Parameters (NOT USING RIGHT NOW)
@@ -51,9 +51,10 @@ int functional_limits[num_servos][2] =
 
 void print_array(int arr[], int num) {
   for (int i = 0; i < num; i++) {
-    printf("%d ", arr[i]);
+    Serial.print(arr[i]);
+    Serial.print(" ");
   }
-  printf("\r\n");
+  Serial.print("\r\n");
 }
 
 // Returns true if angle is good
@@ -224,7 +225,10 @@ void move_motors_from_IK(int alpha[num_servos]) {
 }
 
 void calibrate() {
-  int calib[6] = {90, 90, 90, 90, 90, 90};
-  move_motors(calib);
+
+  for (int i = 0; i < 6; i++) {
+    servos[i].write(90); 
+  }
+  
   print_angles();
 }
