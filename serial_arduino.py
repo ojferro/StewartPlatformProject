@@ -12,7 +12,7 @@ def make_serial_connection():
 
 def format_packet(angles_f):
     angles_i = [round(i) for i in angles_f]
-    print("{}".format(angles_i))
+    print("Target Packet {}".format(angles_i))
 
     packet = struct.pack('<hhhhhh', angles_i[0], angles_i[1], angles_i[2],
                          angles_i[3], angles_i[4], angles_i[5])
@@ -30,7 +30,8 @@ def wait_and_read_from_serial(port, seconds):
     print("Incoming Serial Data: \n")
     while ((calendar.timegm(time.gmtime()) - start) < seconds):
         if (port.in_waiting):
-            print(str(port.readline()))
+            print("{}: {}".format((calendar.timegm(time.gmtime()) - start), 
+                                   str(port.readline())))
 
 ### Test Code ###
 

@@ -216,9 +216,9 @@ void move_motors_from_IK(int alpha[num_servos]) {
     theta[servo] = 90 + (conversion_polarity[servo]*alpha[servo]);
   }
 
-  printf("Given alpha = ");
+  Serial.print("Given alpha = ");
   print_array(alpha, 6);
-  printf("Converted to ");
+  Serial.print("Converted to ");
   print_array(theta, 6);
 
   move_motors(theta);
@@ -231,4 +231,39 @@ void calibrate() {
   }
   
   print_angles();
+}
+
+/* -------- Control Used In Initial Prototype Demo --------------- */ 
+void control(int x, int y) {
+  int angles[6] = {90, 90, 90, 90, 90, 90};
+
+  { // Move Y
+    if (diff_error_bounds(y, 0) > 0) {
+      angles[servo_4] = middle_angle - y;
+      angles[servo_3] = middle_angle + y;
+    } else if (diff_error_bounds(y, 0) < 0) {
+      angles[servo_1] = middle_angle + y;
+      angles[servo_2] = middle_angle + y;
+      angles[servo_5] = middle_angle - y;
+      angles[servo_6] = middle_angle - y;
+    }
+  }
+  
+  { // Move X
+    if (diff_error_bounds(x, 0) < 0) {
+     angles[servo_1] = middle_angle - x;
+     angles[servo_2] = middle_angle - x;
+     angles[servo_3] = middle_angle + x;
+    } else if (diff_error_bounds(x, 0) > 0) {
+     angles[servo_4] = middle_angle - x;
+     angles[servo_5] = middle_angle + x;
+     angles[servo_6] = middle_angle - x; // Turned down
+    }
+  }
+
+  move_motors(angles);
+  
+  for (int i = 0; i < 6; i++) {
+    angles[i] = servos[i].read();
+  }
 }
