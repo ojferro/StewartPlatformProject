@@ -1,5 +1,5 @@
-#include "input.hpp"
-#include "print.hpp"
+  #include "print.hpp"
+#include "input_pi.hpp"
 //#include "motor.hpp"
 #include "inverse_kinematics_lib.hpp"
 
@@ -10,7 +10,8 @@ int y = 0;
 /* ------------------------ Main() Functions -----------------------*/
 
 void setup() {
-    Serial.begin(9600);
+    pinMode(LED_BUILTIN, OUTPUT);
+
     servos[servo_1].attach(servo_1 + servo_pin_offset); // pin 2
     servos[servo_2].attach(servo_2 + servo_pin_offset); // pin 3
     servos[servo_3].attach(servo_3 + servo_pin_offset); // pin 4
@@ -18,63 +19,21 @@ void setup() {
     servos[servo_5].attach(servo_5 + servo_pin_offset); // pin 6
     servos[servo_6].attach(servo_6 + servo_pin_offset); // pin 7
 
-    setup_printf();
-}
-
-void control() {
-  read_joystick(x, y);
-  printf("Joystick: %03d -- %03d\r\n", x, y); 
-  int angles[6] = {90, 90, 90, 90, 90, 90};
-
-  { // Move Y
-    if (diff_error_bounds(y, 0) > 0) {
-      angles[servo_4] = middle_angle - y;
-      angles[servo_3] = middle_angle + y;
-    } else if (diff_error_bounds(y, 0) < 0) {
-      angles[servo_1] = middle_angle + y;
-      angles[servo_2] = middle_angle + y;
-      angles[servo_5] = middle_angle - y;
-      angles[servo_6] = middle_angle - y;
-    }
-  }
-  
-  { // Move X
-    if (diff_error_bounds(x, 0) < 0) {
-     angles[servo_1] = middle_angle - x;
-     angles[servo_2] = middle_angle - x;
-     angles[servo_3] = middle_angle + x;
-    } else if (diff_error_bounds(x, 0) > 0) {
-     angles[servo_4] = middle_angle - x;
-     angles[servo_5] = middle_angle + x;
-     angles[servo_6] = middle_angle - x; // Turned down
-    }
-  }
-
-  move_motors(angles);
-  
-  for (int i = 0; i < 6; i++) {
-    angles[i] = servos[i].read();
-  }
-
+    setup_pi_serial();
 }
 
 
 void loop() {
-  calibrate();  
-  delay(2000);
+  int angles[6] = {0};
 
-//  read_joystick(x,y);
+  while(1) {
+    
+    if (get_joint_angles_from_pi(angles)) {
+      print_array(angles, 6);
+      move_motors_from_IK(angles);
+      Serial.println("Done Moving Motors");
+    }
 
-  printf("Initial IK angles \t");
-  print_array(target_angles, 6);
-  
-  GetJointAngles(DEG2RAD(10), 0, 0);
-  
-  printf("Target IK Angles \t");
-  print_array(target_angles, 6);
-
-//  int angles[6] = {90, 90, 90, 90, 90, 90};
-  move_motors_from_IK(target_angles);
-  print_angles();
-  while(1){}
+    delay(100);
+  }
 }
