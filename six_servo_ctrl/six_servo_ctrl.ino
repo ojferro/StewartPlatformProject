@@ -1,6 +1,5 @@
-  #include "print.hpp"
+#include "print.hpp"
 #include "input_pi.hpp"
-//#include "motor.hpp"
 #include "inverse_kinematics_lib.hpp"
 
 /* --------------------------- Environment Setup ---------------------*/
@@ -19,7 +18,7 @@ void setup() {
     servos[servo_5].attach(servo_5 + servo_pin_offset); // pin 6
     servos[servo_6].attach(servo_6 + servo_pin_offset); // pin 7
 
-    setup_pi_serial();
+    setup_printf();
 }
 
 
@@ -34,6 +33,6 @@ void loop() {
       Serial.println("Done Moving Motors");
     }
 
-    delay(100);
+    delay(300);
   }
 }
