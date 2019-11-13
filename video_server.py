@@ -1,45 +1,17 @@
 # import the necessary packages
-from imutils import build_montages
 from datetime import datetime
 import numpy as np
-import imagezmq
+from imagezmq import imagezmq
 import argparse
 import imutils
 import cv2
  
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--prototxt", required=True,
-	help="path to Caffe 'deploy' prototxt file")
-ap.add_argument("-m", "--model", required=True,
-	help="path to Caffe pre-trained model")
-ap.add_argument("-c", "--confidence", type=float, default=0.2,
-	help="minimum probability to filter weak detections")
-ap.add_argument("-mW", "--montageW", required=True, type=int,
-	help="montage frame width")
-ap.add_argument("-mH", "--montageH", required=True, type=int,
-	help="montage frame height")
 args = vars(ap.parse_args())
 
 # initialize the ImageHub object
 imageHub = imagezmq.ImageHub()
- 
-# initialize the list of class labels MobileNet SSD was trained to
-# detect, then generate a set of bounding box colors for each class
-CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
-	"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
-	"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
-	"sofa", "train", "tvmonitor"]
- 
-# load our serialized model from disk
-print("[INFO] loading model...")
-net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"])
-
-# initialize the consider set (class labels we care about and want
-# to count), the object count dictionary, and the frame  dictionary
-CONSIDER = set(["dog", "person", "car"])
-objCount = {obj: 0 for obj in CONSIDER}
-frameDict = {}
  
 # initialize the dictionary which will contain  information regarding
 # when a device was last active, then store the last time the check
@@ -50,23 +22,20 @@ lastActiveCheck = datetime.now()
 # stores the estimated number of Pis, active checking period, and
 # calculates the duration seconds to wait before making a check to
 # see if a device was active
-ESTIMATED_NUM_PIS = 4
+ESTIMATED_NUM_PIS = 1
 ACTIVE_CHECK_PERIOD = 10
 ACTIVE_CHECK_SECONDS = ESTIMATED_NUM_PIS * ACTIVE_CHECK_PERIOD
- 
-# assign montage width and height so we can view all incoming frames
-# in a single "dashboard"
-mW = args["montageW"]
-mH = args["montageH"]
-print("[INFO] detecting: {}...".format(", ".join(obj for obj in
-	CONSIDER)))
+
+num_received_frames = 0
 
 # start looping over all the frames
 while True:
 	# receive RPi name and frame from the RPi and acknowledge
 	# the receipt
+	print("Num received frames = {}".format(num_received_frames))
 	(rpiName, frame) = imageHub.recv_image()
 	imageHub.send_reply(b'OK')
+	num_received_frames+=1
  
 	# if a device is not in the last active dictionary then it means
 	# that its a newly connected device
@@ -81,8 +50,8 @@ while True:
 	# resize the frame to have a maximum width of 400 pixels, then
 	# grab the frame dimensions and construct a blob
 	frame = imutils.resize(frame, width=400)
-	
-    cv2.imshow("Video Stream", montage)
+
+	cv2.imshow("Video Stream", frame)
  
 	# detect any kepresses
 	key = cv2.waitKey(1) & 0xFF
