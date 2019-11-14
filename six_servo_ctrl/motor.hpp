@@ -200,6 +200,9 @@ bool move_motors(int target_angles[num_servos]) {
     }
   }
 
+  printf("Delays: ");
+  print_array(delay_time, 6);
+
   drive_motors(target_angles, delay_time, mvmt_direction);  
   return true;
 }
