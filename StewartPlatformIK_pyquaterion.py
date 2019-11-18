@@ -107,11 +107,13 @@ def inv_kin():
         # beta_k = 0
         # p_k=np.array([-44.68, -51.78, 0])
         # b_k=np.array([-30.0, -86.75, 0])
-        print([p_k, b_k, beta_k])
+        # print([p_k, b_k, beta_k])
 
-        q_params = get_quat(0.205, 0, 0)
+        q_params = get_quat(0, 0, 0)
         qt = Quaternion(q_params).normalised
+        # print("qt={}, qt.rotate(p_k)={}".format(qt, qt.rotate(p_k)))
 
+        print("qt.rotate(p_k)={}, b_k={}".format(qt.rotate(p_k), b_k))
         l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
         l_k_len = np.linalg.norm(l_k)
         print("l_k={}, length={}".format(l_k, l_k_len))
@@ -120,10 +122,12 @@ def inv_kin():
         f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
         g_k = (l_k_len**2 - ((d_ln)**2 - (h_ln)**2))
 
+        print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
+
 
         alpha_k_rad = math.asin(g_k/math.sqrt((e_k)**2 + (f_k)**2)) - math.atan2(f_k, e_k)
         alpha_k_deg = math.degrees(alpha_k_rad)
-        print("Alpha {} : {}".format(i,alpha_k_deg))
+        print("Alpha {} : {}\n".format(i,alpha_k_deg))
 
     return alpha_k_deg
 
