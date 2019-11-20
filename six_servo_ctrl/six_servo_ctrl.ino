@@ -1,6 +1,6 @@
 #include "print.hpp"
 #include "input_pi.hpp"
-#include "inverse_kinematics_lib.hpp"
+#include "motor_control.hpp"
 
 /* --------------------------- Environment Setup ---------------------*/
 int x = 0;
@@ -24,6 +24,7 @@ void setup() {
 
 void loop() {
   int angles[6] = {0};
+  center();
 
   while(1) {
     
