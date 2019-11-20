@@ -2,7 +2,6 @@
 #define INV_KIN_HPP
 
 #include "linmath.h"
-#include "motor.hpp"
 
 #define DEG2RAD(degree) (degree*M_PI/180.0)
 #define RAD2DEG(radian) (radian*180.0/M_PI)
