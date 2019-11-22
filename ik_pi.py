@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import numpy as np
 import random
 import math
@@ -98,7 +100,7 @@ def inv_kin(roll, pitch, yaw):
 
     return servo_angles
 
-print("\n\nCalculated Servo angles: {}".format(inv_kin(0,0,0)))
+# print("\n\nCalculated Servo angles: {}".format(inv_kin(0,0,0)))
 
 
 # def q_mult(quaternion1, quaternion0):
