@@ -38,7 +38,7 @@ while True:
   # Start timer
   timer = cv2.getTickCount()
 
-  key = cv2.waitKey(2)
+  key = cv2.waitKey(1)
 
   # Update tracker
   if tracker_enabled:
@@ -54,14 +54,10 @@ while True:
         # Tracking failure
         cv2.putText(frame, "Tracking failure detected", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
 
-    # Display tracker type on frame
-    # cv2.putText(frame," Tracker", (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50),2);
-
     # Display FPS on frame
     cv2.putText(frame, "FPS : " + str(int(fps)), (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (50,170,50), 2)
     
   elif key==115: #if s key pressed, select roi
-    print("HOORAY")
     # Select a bounding box
     # bbox = (200, 100, 100, 150) #hard coded for now b/c jupyter
     bbox = cv2.selectROI("frame", frame, True)
@@ -81,5 +77,4 @@ while True:
   cv2.waitKey(10)
 
   # Exit if ESC pressed
-  k = cv2.waitKey(1) & 0xff
-  if k == 27 : break
+  if key == 27 : break
