@@ -80,19 +80,18 @@ def inv_kin(roll, pitch, yaw):
         qt = Quaternion(q_params).normalised
         # print("qt={}, qt.rotate(p_k)={}".format(qt, qt.rotate(p_k)))
 
-        print("qt.rotate(p_k)={}, b_k={}".format(qt.rotate(p_k), b_k))
+        # print("qt.rotate(p_k)={}, b_k={}".format(qt.rotate(p_k), b_k))
         l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
         l_k_len = np.linalg.norm(l_k)
-        print("l_k={}, length={}".format(l_k, l_k_len))
+        # print("l_k={}, length={}".format(l_k, l_k_len))
 
-        print("h_ln={}, beta_k={}".format(h_ln, beta_k))
+        # print("h_ln={}, beta_k={}".format(h_ln, beta_k))
 
         e_k = 2*h_ln*l_k[2]
         f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
         g_k = (l_k_len**2 - ((d_ln)**2 - (h_ln)**2))
 
-        print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
-
+        # print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
 
         alpha_k_rad = math.asin(g_k/math.sqrt((e_k)**2 + (f_k)**2)) - math.atan2(f_k, e_k)
         alpha_k_deg = math.degrees(alpha_k_rad)
