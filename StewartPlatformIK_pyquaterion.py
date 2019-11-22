@@ -65,32 +65,80 @@ def get_quat(roll, pitch, yaw):
 
 def inv_kin():
     #Rod length
-    d_ln = 190
+    d_ln = 187
     #Servo horn length
-    h_ln = 16.52
-    neutral_T=np.array([0, 0, 185])
+    h_ln = 24
+    neutral_T=np.array([0, 0, 184.7585408])
 
     translation=np.array([0,0,0])
 
     
-    b_k_list = np.array([
-        [-30.0, -86.75, 0],
-        [-90.13, 17.4, 0], 
-        [-60.13, 69.36, 0],
-        [60.13, 69.36, 0],
-        [90.13, 17.4, 0],
-        [30, -86.75, 0]
-        ])
-    #Position of joints on platform relative to Op
-    #must have z-value of 0
-    p_k_list = np.array([
-        [-44.68, -51.78, 0],
-        [-67.18, -12.8, 0],
-        [-22.5, 64.58, 0],
-        [22.5, 64.58, 0],
-        [67.18, -12.8, 0],
-        [44.68, -51.78, 0]
-        ])
+    # b_k_list = np.array([
+    #     [-30.0, -86.75, 0],
+    #     [-90.13, 17.4, 0], 
+    #     [-60.13, 69.36, 0],
+    #     [60.13, 69.36, 0],
+    #     [90.13, 17.4, 0],
+    #     [30, -86.75, 0]
+    #     ])
+    # #Position of joints on platform relative to Op
+    # #must have z-value of 0
+    # p_k_list = np.array([
+    #     [-44.68, -51.78, 0],
+    #     [-67.18, -12.8, 0],
+    #     [-22.5, 64.58, 0],
+    #     [22.5, 64.58, 0],
+    #     [67.18, -12.8, 0],
+    #     [44.68, -51.78, 0]
+    #     ])
+
+    # top_view_angles = np.array([
+    #     -160.923523178042,
+    #     -79.0732170113642,
+    #     -40.9228733935925,
+    #     40.9228733935925,
+    #     79.0732170113642,
+    #     160.923523178042
+    # ])
+    top_view_angles = np.array([
+        -160.0,
+        -80.0,
+        -40.0,
+        40.0,
+        80.0,
+        160.0
+    ])
+    top_view_angles = top_view_angles*(math.pi/180.0)
+    b_k_list = np.empty([0,3])
+    p_k_list = np.empty([0,3])
+    b_k_norm = 66.66
+    p_k_norm = 50.62
+
+    for i, top_view_angle in enumerate(top_view_angles):
+        b_k_list = np.append(b_k_list, [[b_k_norm*math.cos(top_view_angle), b_k_norm*math.sin(top_view_angle), 0]], axis=0)
+        p_k_list = np.append(p_k_list, [[p_k_norm*math.cos(top_view_angle), p_k_norm*math.sin(top_view_angle), 0]], axis=0)
+
+    print("b_k_list: {}".format(b_k_list))
+    print("p_k_list: {}".format(p_k_list))
+
+    # b_k_list = np.array([
+    #     [-62.999, -21.786, 0],
+    #     [12.636, -65.451, 0],
+    #     [50.368, -43.665, 0],
+    #     [50.368, 43.665, 0],
+    #     [12.636, 65.451, 0],
+    #     [-62.999, 21.786, 0]
+    #     ])
+    # #Position of joints on platform relative to Op
+    # #must have z-value of 0
+    # p_k_list = np.array([
+    #     [-47.840, -16.544, 0],
+    #     [9.595, -49.702, 0],
+    #     [38.248, -33.158, 0],
+    #     [38.248, 33.158, 0],
+    #     [9.595, 49.702, 0],
+    #     [-47.840, 16.544, 0]
+    #     ])
 
     #Angles of servo horn w.r.t. horizontnal about z axis
     beta_k_list = np.array([
@@ -101,7 +149,9 @@ def inv_kin():
         120,
         0
         ])
-    beta_k_list*(math.pi/180.0)
+    beta_k_list = beta_k_list*(math.pi/180.0)
+
+    print("beta_k_list={}".format(beta_k_list))
     
     for i, (p_k, b_k, beta_k) in enumerate(zip(p_k_list, b_k_list, beta_k_list)):
         # beta_k = 0
@@ -109,7 +159,7 @@ def inv_kin():
         # b_k=np.array([-30.0, -86.75, 0])
         # print([p_k, b_k, beta_k])
 
-        q_params = get_quat(0, 0, 0)
+        q_params = get_quat(math.radians(20), 0, 0)
         qt = Quaternion(q_params).normalised
         # print("qt={}, qt.rotate(p_k)={}".format(qt, qt.rotate(p_k)))
 
@@ -117,6 +167,8 @@ def inv_kin():
         l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
         l_k_len = np.linalg.norm(l_k)
         print("l_k={}, length={}".format(l_k, l_k_len))
+
+        print("h_ln={}, beta_k={}".format(h_ln, beta_k))
 
         e_k = 2*h_ln*l_k[2]
         f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
