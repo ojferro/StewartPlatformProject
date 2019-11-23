@@ -47,8 +47,8 @@ for i, (top_angle_base, top_angle_platform) in enumerate(zip(top_view_angles_bas
     b_k_list = np.append(b_k_list, [[b_k_norm*math.cos(top_angle_base), b_k_norm*math.sin(top_angle_base), 0]], axis=0)
     p_k_list = np.append(p_k_list, [[p_k_norm*math.cos(top_angle_platform), p_k_norm*math.sin(top_angle_platform), 0]], axis=0)
 
-print("b_k_list: {}".format(b_k_list))
-print("p_k_list: {}".format(p_k_list))
+# print("b_k_list: {}".format(b_k_list))
+# print("p_k_list: {}".format(p_k_list))
 
 # Angles of servo horn w.r.t. horizontnal about z axis
 beta_k_list = np.array([
@@ -98,15 +98,15 @@ def inv_kin(rotation, translation):
         # print("qt.rotate(p_k)={}, b_k={}".format(qt.rotate(p_k), b_k))
         l_k = (neutral_T+translation) + qt.rotate(p_k) - b_k
         l_k_len = np.linalg.norm(l_k)
-        print("l_k={}, length={}".format(l_k, l_k_len))
+        # print("l_k={}, length={}".format(l_k, l_k_len))
 
-        print("h_ln={}, beta_k={}".format(h_ln, beta_k))
+        # print("h_ln={}, beta_k={}".format(h_ln, beta_k))
 
         e_k = 2*h_ln*l_k[2]
         f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
         g_k = (l_k_len**2 - ((d_ln)**2 - (h_ln)**2))
 
-        print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
+        # print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
 
         alpha_k_rad = math.asin(g_k/math.sqrt((e_k)**2 + (f_k)**2)) - math.atan2(f_k, e_k)
         alpha_k_deg = math.degrees(alpha_k_rad)
@@ -114,4 +114,4 @@ def inv_kin(rotation, translation):
 
     return servo_angles
 
-print("\n\nCalculated Servo angles: {}".format(inv_kin(10,10,10, [0,0,0])))
+# print("\n\nCalculated Servo angles: {}".format(inv_kin(10,10,10, [0,0,0])))
