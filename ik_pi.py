@@ -13,8 +13,6 @@ d_ln = 193.0
 h_ln = 24
 # Translation offset vector in neutral state
 neutral_T=np.array([0, 0, 190.6])
-# Global translation vector
-translation=np.array([0,0,0])
 
 # Angles specifying servo location on the top-down view of base
 top_view_angles_base = np.array([
@@ -54,12 +52,12 @@ print("p_k_list: {}".format(p_k_list))
 
 # Angles of servo horn w.r.t. horizontnal about z axis
 beta_k_list = np.array([
-    180.0,
-    0.0,
-    300.0,
-    120.0,
-    60.0,
-    240.0
+    0,
+    0,
+    120,
+    120,
+    240,
+    240
     ])
 beta_k_list = beta_k_list*(math.pi/180.0) # Convert to radians
 
@@ -81,25 +79,27 @@ def get_quat(roll, pitch, yaw):
     return np.array([w,x,y,z])
 
 # Compute servo angles given desired orientation (in degrees)
-def inv_kin(roll, pitch, yaw):
+def inv_kin(roll, pitch, yaw, translation):
     # Convert input parameters to radians
     roll = roll*math.pi/180
     pitch = pitch*math.pi/180
     yaw = yaw*math.pi/180
 
     servo_angles = []
+
+    q_params = get_quat(roll, pitch, yaw)
+    qt = Quaternion(q_params).normalised
+    print("qt_ours={}".format(qt))
     
     for i, (p_k, b_k, beta_k) in enumerate(zip(p_k_list, b_k_list, beta_k_list)):
-        q_params = get_quat(roll, pitch, yaw)
-        qt = Quaternion(q_params).normalised
-        # print("qt={}, qt.rotate(p_k)={}".format(qt, qt.rotate(p_k)))
+        # print("qt.rotate(p_k)={}".format(qt.rotate(p_k)))
 
         # print("qt.rotate(p_k)={}, b_k={}".format(qt.rotate(p_k), b_k))
-        l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
+        l_k = (neutral_T+translation) + qt.rotate(p_k) - b_k
         l_k_len = np.linalg.norm(l_k)
         print("l_k={}, length={}".format(l_k, l_k_len))
 
-        # print("h_ln={}, beta_k={}".format(h_ln, beta_k))
+        print("h_ln={}, beta_k={}".format(h_ln, beta_k))
 
         e_k = 2*h_ln*l_k[2]
         f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
@@ -113,7 +113,7 @@ def inv_kin(roll, pitch, yaw):
 
     return servo_angles
 
-print("\n\nCalculated Servo angles: {}".format(inv_kin(0,10,0)))
+print("\n\nCalculated Servo angles: {}".format(inv_kin(10,10,10, [0,0,0])))
 
 
 # def q_mult(quaternion1, quaternion0):
