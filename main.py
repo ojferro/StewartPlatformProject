@@ -21,7 +21,7 @@ def main():
         error_x, error_y = trk.get_cv_error()
         # Get Joint Angles From IK
         roll, pitch, yaw = trk.error_to_angles(error_x, error_y)
-        angles = ik_pi.inv_kin(roll, pitch, yaw)
+        angles = ik_pi.inv_kin([roll, pitch, yaw], [0,0,0])
         # Random angles for testing
         # angles = [(min_ang + (random.random() * (max_ang - min_ang))) for i in range(6)]
         print(angles)

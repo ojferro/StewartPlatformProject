@@ -79,7 +79,8 @@ def get_quat(roll, pitch, yaw):
     return np.array([w,x,y,z])
 
 # Compute servo angles given desired orientation (in degrees)
-def inv_kin(roll, pitch, yaw, translation):
+def inv_kin(rotation, translation):
+    roll, pitch, yaw = rotation
     # Convert input parameters to radians
     roll = roll*math.pi/180
     pitch = pitch*math.pi/180
