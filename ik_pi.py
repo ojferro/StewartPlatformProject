@@ -8,44 +8,58 @@ from pyquaternion import Quaternion
 ## Parameter Initialization
 
 # Rod length
-d_ln = 187
+d_ln = 193.0
 # Servo horn length
 h_ln = 24
 # Translation offset vector in neutral state
-neutral_T=np.array([0, 0, 184.7585408])
+neutral_T=np.array([0, 0, 190.6])
 # Global translation vector
 translation=np.array([0,0,0])
 
-# Angles specifying servo location on the top-down view of platform
-top_view_angles = np.array([
-    -160.0,
-    -80.0,
-    -40.0,
-    40.0,
-    80.0,
-    160.0
+# Angles specifying servo location on the top-down view of base
+top_view_angles_base = np.array([
+    242.0119595,
+    297.9880405,
+    2.011959459,
+    57.98804054,
+    122.0119595,
+    177.9880405
 ])
-top_view_angles = top_view_angles*(math.pi/180.0) # Convert to radians
+top_view_angles_base = top_view_angles_base*(math.pi/180.0) # Convert to radians
+
+# Angles specifying servo location on the top-down view of platform
+top_view_angles_platform = np.array([
+    230.0694965,
+    309.9305035,
+    350.0694965,
+    69.93050353,
+    110.0694965,
+    189.9305035
+])
+top_view_angles_platform = top_view_angles_platform*(math.pi/180.0) # Convert to radians
 
 b_k_list = np.empty([0,3])
-b_k_norm = 66.66 # Length of vector from base origin to a base servo
+b_k_norm = 73.83537431 # Length of vector from base origin to a base servo
 
 p_k_list = np.empty([0,3])
-p_k_norm = 50.62 # Lenght of vector from platform origin to a platform servo joint
+p_k_norm = 50.99666656 # Lenght of vector from platform origin to a platform servo joint
 
-for i, top_view_angle in enumerate(top_view_angles):
+for i, (top_angle_base, top_angle_platform) in enumerate(zip(top_view_angles_base, top_view_angles_platform)):
     # Compute vector to joints from base and platform origin respectively
-    b_k_list = np.append(b_k_list, [[b_k_norm*math.cos(top_view_angle), b_k_norm*math.sin(top_view_angle), 0]], axis=0)
-    p_k_list = np.append(p_k_list, [[p_k_norm*math.cos(top_view_angle), p_k_norm*math.sin(top_view_angle), 0]], axis=0)
+    b_k_list = np.append(b_k_list, [[b_k_norm*math.cos(top_angle_base), b_k_norm*math.sin(top_angle_base), 0]], axis=0)
+    p_k_list = np.append(p_k_list, [[p_k_norm*math.cos(top_angle_platform), p_k_norm*math.sin(top_angle_platform), 0]], axis=0)
+
+print("b_k_list: {}".format(b_k_list))
+print("p_k_list: {}".format(p_k_list))
 
 # Angles of servo horn w.r.t. horizontnal about z axis
 beta_k_list = np.array([
-    0,
-    240,
-    240,
-    120,
-    120,
-    0
+    180.0,
+    0.0,
+    300.0,
+    120.0,
+    60.0,
+    240.0
     ])
 beta_k_list = beta_k_list*(math.pi/180.0) # Convert to radians
 
@@ -83,7 +97,7 @@ def inv_kin(roll, pitch, yaw):
         # print("qt.rotate(p_k)={}, b_k={}".format(qt.rotate(p_k), b_k))
         l_k = (neutral_T+translation)+qt.rotate(p_k) - b_k
         l_k_len = np.linalg.norm(l_k)
-        # print("l_k={}, length={}".format(l_k, l_k_len))
+        print("l_k={}, length={}".format(l_k, l_k_len))
 
         # print("h_ln={}, beta_k={}".format(h_ln, beta_k))
 
@@ -91,7 +105,7 @@ def inv_kin(roll, pitch, yaw):
         f_k = 2*h_ln*((math.cos(beta_k)*l_k[0])+(math.sin(beta_k)*l_k[1]))
         g_k = (l_k_len**2 - ((d_ln)**2 - (h_ln)**2))
 
-        # print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
+        print("e_k={}, f_k={}, g_k={}".format(e_k, f_k, g_k))
 
         alpha_k_rad = math.asin(g_k/math.sqrt((e_k)**2 + (f_k)**2)) - math.atan2(f_k, e_k)
         alpha_k_deg = math.degrees(alpha_k_rad)
@@ -99,7 +113,7 @@ def inv_kin(roll, pitch, yaw):
 
     return servo_angles
 
-# print("\n\nCalculated Servo angles: {}".format(inv_kin(0,0,0)))
+print("\n\nCalculated Servo angles: {}".format(inv_kin(0,10,0)))
 
 
 # def q_mult(quaternion1, quaternion0):
