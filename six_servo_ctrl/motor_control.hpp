@@ -8,12 +8,16 @@ bool move_motors(int target_angles[num_servos]) {
   volatile float max_travel_time = 0; // Arduino IDE needs this to be volatile for some god forsaken reason
   float travel_time = 0;
   int slowest_servo; // Not using enum type because it reduces needed typecasts
+  
+  // unsigned long start_time_3 = micros();
+  // Serial.print("move_motors Start Time:");
+  // Serial.println(start_time_3);
 
   // Find distances & times for each motor given target
   for (int servo = servo_1; servo < num_servos; servo++) {
     // Return early if any angles are bad
     if (!angle_in_bounds(target_angles[servo], servo)) {
-      printf("Invalid angle %d passed for servo %d (0-indexed!!!) to move_motors", target_angles[servo], servo);
+      printf("Invalid angle %d passed for servo %d (0-indexed!!!) to move_motors\r\n", target_angles[servo], servo);
       return false;
     }
     
@@ -44,10 +48,12 @@ bool move_motors(int target_angles[num_servos]) {
     }
   }
 
-  printf("Delays: ");
-  print_array(delay_time, 6);
-
-  drive_motors(target_angles, delay_time, mvmt_direction);  
+  drive_motors(target_angles, delay_time, mvmt_direction);
+  
+  // unsigned long end_time_3 = micros();
+  // Serial.print("move_motors End Time:");
+  // Serial.println(end_time_3);
+  
   return true;
 }
 
@@ -55,6 +61,10 @@ bool move_motors(int target_angles[num_servos]) {
 void move_motors_from_IK(int alpha[num_servos]) {
   int theta[num_servos] = {0};
   
+  // unsigned long start_time_2 = micros();
+  // Serial.print("move_motors_form_IK Start Time:");
+  // Serial.println(start_time_2);
+
   for (int servo = servo_1; servo < num_servos; servo++) {
     if (alpha[servo] > ik_angle_max || alpha[servo] < ik_angle_min) {
       printf("Invalid Angle %d for servo %d passed from IK (0-indexed!!!!)\r\n", alpha[servo], servo);
@@ -64,19 +74,27 @@ void move_motors_from_IK(int alpha[num_servos]) {
     theta[servo] = 90 + (conversion_polarity[servo]*alpha[servo]);
   }
 
-  Serial.print("Given alpha = ");
-  print_array(alpha, 6);
-  Serial.print("Converted to ");
-  print_array(theta, 6);
-
   move_motors(theta);
+
+  // unsigned long end_time_2 = micros();
+  // Serial.print("move_motors_from_IK End Time:");
+  // Serial.println(end_time_2);
 }
 
 
-void center() {
-  printf("Centering Motors\r\n");
+void center_platform() {
+  printf("Centering Platform\r\n");
   for (int i = 0; i < num_servos; i++) {
     servos[i].write(motor_calib_center[i]); 
+  }
+  
+  print_angles();
+}
+
+void center_motors() {
+  printf("Centering Motors\r\n");
+  for (int i = 0; i < num_servos; i++) {
+    servos[i].write(middle_angle); 
   }
   
   print_angles();

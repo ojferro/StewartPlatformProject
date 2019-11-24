@@ -42,17 +42,17 @@ typedef enum {
   num_servos
 } servos_idx_e;
 
-// Globally acsessile array for motor control
+// Globally accessile array for motor control
 Servo servos[6];
 
 // Metadata used for IK angle conversion to driver reference frame
-int conversion_polarity[num_servos] = {-1, +1, -1, +1, -1, +1};
+int conversion_polarity[num_servos] = {-1, 1, -1, 1, -1, 1};
 int functional_limits[num_servos][2] = 
 { {0, 135}, {45, 180}, {0, 135}, {45, 180}, {0, 135}, {45, 180} };
 
 // Angles for specific calibration forms
 int motor_calib_level[num_servos] = {85, 95, 92, 85, 95, 95};
-int motor_calib_center[num_servos] = {90, 86, 88, 92, 91, 90};
+int motor_calib_center[num_servos] = {87, 86, 88, 92, 91, 90};
 
 /* ----------------- Helper Functions ---------------------------------*/ 
 
@@ -123,7 +123,11 @@ void simple_ramp(servos_idx_e servo, int target_angle) {
 void drive_motors(int target_angles[num_servos], int delay_time_ms[num_servos], int mvmt_direction[num_servos]) {
   uint8_t motor_moving = 0;
   int last_time_moved[num_servos] = {0};
-
+  
+  // unsigned long start_time_4 = micros();
+  // Serial.print("drive_motors Start Time:");
+  // Serial.println(start_time_4);
+  
   // Create a byte with 1 bit for each that needs to move
   for (int servo = 0; servo < num_servos; servo++) {
     motor_moving |= ((delay_time_ms[servo] != 0) << servo);
@@ -146,6 +150,10 @@ void drive_motors(int target_angles[num_servos], int delay_time_ms[num_servos], 
       }
     }
   }
+
+  // unsigned long end_time_4 = micros();
+  // Serial.print("drive_motors End Time:");
+  // Serial.println(end_time_4);
 }
 
 int map_velocity_to_delay(float omega) {
