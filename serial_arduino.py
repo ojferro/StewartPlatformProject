@@ -23,7 +23,6 @@ def format_packet(angles_f):
 def send_angles_to_arduino(port, pkt):
     port.flush()
     port.write(pkt)
-    time.sleep(2)  # Buffer time to write to Serial
 
 def wait_and_read_from_serial(port, seconds):
     start = calendar.timegm(time.gmtime())
@@ -35,15 +34,9 @@ def wait_and_read_from_serial(port, seconds):
 
 ### Test Code ###
 
-def open_arduino_serial():
-    port = serial.Serial('/dev/ttyACM0', 9600, timeout = 0)
-    time.sleep(2)  # Time required since arduino will reset
-    return port
-
-
 def test_main():
     angles = [-11.6, -21.1, -13.44, -44.5, -52.6, -16.0]
-    port = open_arduino_serial()
+    port = make_serial_connection()
     pkt = format_packet(port, angles)
     send_angles_to_arduino(pkt)
     wait_and_read_from_serial(port, 10)
