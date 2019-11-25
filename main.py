@@ -32,6 +32,28 @@ def main():
 
         print("Done Iteration")
 
+def test_main():
+    port = serial_arduino.make_serial_connection()
+
+    for i in range(15):
+        angles = ik_pi.inv_kin([0, 0, 2*i], [0,0,0])
+        packet = serial_arduino.format_packet(angles)
+        serial_arduino.send_angles_to_arduino(port, packet)
+
+    for i in range(15,0,-1):
+        angles = ik_pi.inv_kin([0, 0, 2*i], [0,0,0])
+        packet = serial_arduino.format_packet(angles)
+        serial_arduino.send_angles_to_arduino(port, packet)
+    
+    for i in range(15):
+        angles = ik_pi.inv_kin([0, 0, 2*i], [0,0,0])
+        packet = serial_arduino.format_packet(angles)
+        serial_arduino.send_angles_to_arduino(port, packet)
+    
+    for i in range(15,0,-1):
+        angles = ik_pi.inv_kin([0, 0, 2*i], [0,0,0])
+        packet = serial_arduino.format_packet(angles)
+        serial_arduino.send_angles_to_arduino(port, packet)   
 
 if __name__ == "__main__":
     main()
