@@ -30,18 +30,18 @@ void run_from_pi() {
     if (get_joint_angles_from_pi(angles)) {
       print_array(angles, 6);
       
-      unsigned long start_time = micros();
-      Serial.print("Motor Math Start Time:");
-      Serial.println(start_time);
+//      unsigned long start_time = micros();
+//      Serial.print("Motor Math Start Time:");
+//      Serial.println(start_time);
       
       move_motors_from_IK(angles);
       
-      unsigned long end_time = micros();
-      Serial.print("Motor Math End Time:");
-      Serial.println(end_time);
-
-      unsigned long diff = end_time - start_time;
-      printf("Done Moving Motors, Total Time Delta: %lu\r\n", diff);
+//      unsigned long end_time = micros();
+//      Serial.print("Motor Math End Time:");
+//      Serial.println(end_time);
+//
+//      unsigned long diff = end_time - start_time;
+//      printf("Done Moving Motors, Total Time Delta: %lu\r\n", diff);
     }
   }
 }

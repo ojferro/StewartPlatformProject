@@ -23,6 +23,7 @@ def format_packet(angles_f):
 def send_angles_to_arduino(port, pkt):
     port.flush()
     port.write(pkt)
+    time.sleep(0.1)
 
 def wait_and_read_from_serial(port, seconds):
     start = calendar.timegm(time.gmtime())
