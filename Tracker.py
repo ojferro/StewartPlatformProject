@@ -57,6 +57,8 @@ def get_cv_error():
 
   # Read a new frame
   ok, frame = video.read()
+  frame = cv2.flip(frame,0)  
+
   if not ok:
       return False
   
@@ -120,7 +122,7 @@ def error_to_angles(err_x, err_y):
     k_p_y = 0.05
     diff_err_y = (err_y - 320) if abs(err_y - 320) > 35 else 0
     cam_rot = (diff_err_y/22.0) * k_p_y 
-    pitch = cam_rot * np.cos(np.pi / 3.)
-    roll = cam_rot * np.sin(np.pi / 3.) * -1
+    pitch = cam_rot * np.cos(np.pi / 3.) * -1
+    roll = cam_rot * np.sin(np.pi / 3.)
     
     return [roll,pitch,yaw]
