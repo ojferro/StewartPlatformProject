@@ -12,7 +12,7 @@ def make_serial_connection():
 
 def format_packet(angles_f):
     angles_i = [round(i) for i in angles_f]
-    print("Target Packet {}".format(angles_i))
+    #print("Target Packet {}".format(angles_i))
 
     packet = struct.pack('<hhhhhh', angles_i[0], angles_i[1], angles_i[2],
                          angles_i[3], angles_i[4], angles_i[5])
@@ -23,7 +23,7 @@ def format_packet(angles_f):
 def send_angles_to_arduino(port, pkt):
     port.flush()
     port.write(pkt)
-    time.sleep(0.1)
+    #time.sleep(0.1)
 
 def wait_and_read_from_serial(port, seconds):
     start = calendar.timegm(time.gmtime())

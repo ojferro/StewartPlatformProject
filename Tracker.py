@@ -16,7 +16,7 @@ def get_bbox_centre(bbox):
   return (int(bbox[0] + bbox[2]/2), int(bbox[1] + bbox[3]/2))
 
 def get_centres_avg(bbox_buffer):
-  print(bbox_buffer)
+  #print(bbox_buffer)
   return (int(np.average(np.array(bbox_buffer)[:,0])), int(np.average(np.array(bbox_buffer)[:,1])))
 
 # tracker = cv2.TrackerCSRT_create()
@@ -111,5 +111,16 @@ def get_cv_error():
   # Exit if ESC pressed
   # if key == 27 : break
 
+# 8 = 240 pix diff / 30 deg yaws
 def error_to_angles(err_x, err_y):
-  return [0,0,0]
+    k_p_x = 0.06
+    diff_err_x = (err_x - 240) if abs(err_x - 240) > 35 else 0
+    yaw = (diff_err_x/8) * k_p_x # Proportional Gain for Yaw
+    
+    k_p_y = 0.05
+    diff_err_y = (err_y - 320) if abs(err_y - 320) > 35 else 0
+    cam_rot = (diff_err_y/22.0) * k_p_y 
+    pitch = cam_rot * np.cos(np.pi / 3.)
+    roll = cam_rot * np.sin(np.pi / 3.) * -1
+    
+    return [roll,pitch,yaw]

@@ -90,7 +90,7 @@ def inv_kin(rotation, translation):
 
     q_params = get_quat(roll, pitch, yaw)
     qt = Quaternion(q_params).normalised
-    print("qt_ours={}".format(qt))
+    #print("qt_ours={}".format(qt))
     
     for i, (p_k, b_k, beta_k) in enumerate(zip(p_k_list, b_k_list, beta_k_list)):
         # print("qt.rotate(p_k)={}".format(qt.rotate(p_k)))
