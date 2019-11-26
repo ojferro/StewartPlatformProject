@@ -5,6 +5,7 @@ def send_error(socket, frame_num, cv_err, flags=0, copy=True, track=False):
         frame = frame_num,
         err = cv_err
     )
+    print("Sending data: {}".format(md))
     return socket.send_json(md, flags)
 
 def recv_error(socket, flags=0, copy=True, track=False):
@@ -17,8 +18,10 @@ def create_socket(socket_type = zmq.SUB):
     socket = context.socket(socket_type)
 
     if (socket_type == zmq.PUB):
-        socket.bind("tcp://*:5555")
+        socket.bind("tcp://*:5556")
+        print("Bound socket to tcp://*:5555")
     else:
-        socket.connect("tcp://localhost:5555")
+        socket.connect("tcp://localhost:5556")
+        print("Bound socket to tcp://localhost:5555")
     
     return socket

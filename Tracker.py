@@ -68,7 +68,7 @@ def get_cv_error():
   timer = cv2.getTickCount()
 
   key = cv2.waitKey(1)
-  print("Key: {}".format(key))
+  # print("Key: {}".format(key))
 
   # Update tracker
   if tracker_enabled:
