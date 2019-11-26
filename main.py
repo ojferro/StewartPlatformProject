@@ -4,26 +4,44 @@ import time
 import serial
 import random
 import numpy as np
-import Tracker as trk
+# import Tracker as trk
+import ipc_pi as ipc
+import zmq
+
+def error_to_angles(err_x, err_y):
+    k_p_x = 0.06
+    diff_err_x = (err_x - 240) if abs(err_x - 240) > 35 else 0
+    yaw = (diff_err_x/8) * k_p_x # Proportional Gain for Yaw
+    
+    k_p_y = 0.05
+    diff_err_y = (err_y - 320) if abs(err_y - 320) > 35 else 0
+    cam_rot = (diff_err_y/22.0) * k_p_y 
+    pitch = cam_rot * np.cos(np.pi / 3.) * -1
+    roll = cam_rot * np.sin(np.pi / 3.)
+    
+    return [roll,pitch,yaw]
 
 def main():
-    port = serial_arduino.make_serial_connection()
+    print("In main")
+    socket = ipc.create_socket(zmq.SUB)
+    print("Initialized ZMQ socket")
+    # port = serial_arduino.make_serial_connection()
     min_ang = -45
     max_ang = 90
     current_rpy = [0,0,0]
     
-    print("Calling Init CV")
-    trk.init_cv()
-    #Simply output frames until bbox is selected
-    while not trk.tracker_enabled:
-        trk.get_cv_error()
+    # print("Calling Init CV")
+    # trk.init_cv()
+    # #Simply output frames until bbox is selected
+    # while not trk.tracker_enabled:
+    #     trk.get_cv_error()
 
 
     while True:
         # Get Error From CV
-        error_x, error_y = trk.get_cv_error()
+        error_x, error_y = ipc.recv_error(socket)
         # Get Joint Angles From IK
-        new_roll, new_pitch, new_yaw = trk.error_to_angles(error_x, error_y)
+        new_roll, new_pitch, new_yaw = error_to_angles(error_x, error_y)
         new_current_roll = current_rpy[0]+new_roll
         new_current_pitch = current_rpy[1]+new_pitch
         new_current_yaw = current_rpy[2]+new_yaw
@@ -40,8 +58,8 @@ def main():
         # angles = [(min_ang + (random.random() * (max_ang - min_ang))) for i in range(6)]
         print(angles)
 
-        packet = serial_arduino.format_packet(angles)
-        serial_arduino.send_angles_to_arduino(port, packet)
+        # packet = serial_arduino.format_packet(angles)
+        # serial_arduino.send_angles_to_arduino(port, packet)
         #serial_arduino.wait_and_read_from_serial(port, 10)
 
         print("!!!SENT PACKET!!!")

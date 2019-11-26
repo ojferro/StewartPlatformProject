@@ -8,6 +8,8 @@
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
+import zmq
+import ipc_pi as ipc
 
 def min_to_ms(min):
   return int(min*60*1000)
@@ -66,6 +68,7 @@ def get_cv_error():
   timer = cv2.getTickCount()
 
   key = cv2.waitKey(1)
+  print("Key: {}".format(key))
 
   # Update tracker
   if tracker_enabled:
@@ -114,15 +117,26 @@ def get_cv_error():
   # if key == 27 : break
 
 # 8 = 240 pix diff / 30 deg yaws
-def error_to_angles(err_x, err_y):
-    k_p_x = 0.06
-    diff_err_x = (err_x - 240) if abs(err_x - 240) > 35 else 0
-    yaw = (diff_err_x/8) * k_p_x # Proportional Gain for Yaw
-    
-    k_p_y = 0.05
-    diff_err_y = (err_y - 320) if abs(err_y - 320) > 35 else 0
-    cam_rot = (diff_err_y/22.0) * k_p_y 
-    pitch = cam_rot * np.cos(np.pi / 3.) * -1
-    roll = cam_rot * np.sin(np.pi / 3.)
-    
-    return [roll,pitch,yaw]
+
+def main():
+  # Initialize socket for IPC between tracker and main
+  print("Initializing ZMQ socket")
+  socket = ipc.create_socket(zmq.PUB)
+  frame_num = 0
+
+  print("Calling Init CV")
+  init_cv()
+  #Simply output frames until bbox is selected
+  while not tracker_enabled:
+      get_cv_error()
+      frame_num+=1
+
+  while True:
+    # Get Error From CV
+      error_x, error_y = get_cv_error()
+      ipc.send_error(socket, frame_num, [error_x, error_y])
+      frame_num+=1
+
+
+if __name__ == "__main__":
+    main()
