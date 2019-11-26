@@ -121,7 +121,7 @@ def get_cv_error():
 def main():
   # Initialize socket for IPC between tracker and main
   print("Initializing ZMQ socket")
-  socket = ipc.create_socket(zmq.PUB)
+  socket = ipc.create_socket(zmq.PUB, '169.254.128.132')
   frame_num = 0
 
   print("Calling Init CV")

@@ -23,7 +23,7 @@ def error_to_angles(err_x, err_y):
 
 def main():
     print("In main")
-    socket = ipc.create_socket(zmq.SUB)
+    socket = ipc.create_socket(zmq.SUB, '169.254.128.132')
     print("Initialized ZMQ socket")
     # port = serial_arduino.make_serial_connection()
     min_ang = -45

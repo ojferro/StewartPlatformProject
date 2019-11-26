@@ -13,15 +13,15 @@ def recv_error(socket, flags=0, copy=True, track=False):
     print("Received error data from frame {}, data: {}".format(md['frame'], md['err']))
     return md['err']
 
-def create_socket(socket_type = zmq.SUB):
+def create_socket(socket_type = zmq.SUB, eth_addr='127.0.0.1'):
     context = zmq.Context()
     socket = context.socket(socket_type)
 
     if (socket_type == zmq.PUB):
-        socket.bind("tcp://*:5556")
-        print("Bound socket to tcp://*:5555")
+        socket.bind("tcp://*:5555")
+        print("Bound socket to {}".format("tcp://*:5555"))
     else:
-        socket.connect("tcp://localhost:5556")
-        print("Bound socket to tcp://localhost:5555")
+        socket.connect("tcp://%s:5555" % eth_addr)
+        print("Bound socket to {}".format("tcp://%s:5555" % eth_addr))
     
     return socket
