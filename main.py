@@ -53,7 +53,6 @@ def main():
 
         packet = serial_arduino.format_packet(angles)
         serial_arduino.send_angles_to_arduino(port, packet)
-        serial_arduino.wait_and_read_from_serial(port, 10)
 
         print("!!!SENT PACKET!!!")
 
