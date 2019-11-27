@@ -21,7 +21,7 @@ def get_centres_avg(bbox_buffer):
   #print(bbox_buffer)
   return (int(np.average(np.array(bbox_buffer)[:,0])), int(np.average(np.array(bbox_buffer)[:,1])))
 
-tracker = cv2.TrackerCSRT_create()
+tracker = cv2.TrackerMedianFlow_create()
 # tracker = cv2.TrackerKCF_create()
 tracker_enabled = False
 bbox = ()
@@ -93,7 +93,7 @@ def get_cv_error():
 
         if (cnt_since_failure > 150): # If more than 5s since failure
           tracker_enabled = False
-          tracker = cv2.TrackerCSRT_create()
+          tracker = cv2.TrackerMedianFlow_create()
 
     # Display FPS on frame
     cv2.putText(frame, "FPS : " + str(int(fps)), (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (50,170,50), 2)
