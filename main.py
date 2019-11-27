@@ -22,10 +22,11 @@ def error_to_angles(err_x, err_y):
     return [roll,pitch,yaw]
 
 def main():
+    port = serial_arduino.make_serial_connection()
+
     socket = ipc.create_socket(zmq.SUB)
     print("Initialized ZMQ socket")
-
-    port = serial_arduino.make_serial_connection()
+    
     min_ang = -45
     max_ang = 90
     current_rpy = [0,0,0]
