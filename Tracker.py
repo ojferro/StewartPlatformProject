@@ -21,13 +21,14 @@ def get_centres_avg(bbox_buffer):
   #print(bbox_buffer)
   return (int(np.average(np.array(bbox_buffer)[:,0])), int(np.average(np.array(bbox_buffer)[:,1])))
 
-# tracker = cv2.TrackerCSRT_create()
-tracker = cv2.TrackerKCF_create()
+tracker = cv2.TrackerCSRT_create()
+# tracker = cv2.TrackerKCF_create()
 tracker_enabled = False
 bbox = ()
 bbox_buffer_ln = 5 # num bboxes to be averaged
 bbox_buffer=[]
 cnt=0
+cnt_since_failure = 0
 
 # Read video
 video = cv2.VideoCapture(0)#("dashcam_video.mp4")
@@ -46,13 +47,15 @@ def init_cv():
   # Read first frame.
   ok, frame = video.read()
   if not ok:
-    print ('Cannot read video file')
+    print ('Cannot read video file') 
 
 def get_cv_error():
   global cnt
   global tracker_enabled
   global bbox_buffer
   global fps
+  global cnt_since_failure
+  global tracker
 
 
   cnt +=1
@@ -86,6 +89,11 @@ def get_cv_error():
     else:
         # Tracking failure
         cv2.putText(frame, "Tracking failure detected", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
+        cnt_since_failure+=1
+
+        if (cnt_since_failure > 150): # If more than 5s since failure
+          tracker_enabled = False
+          tracker = cv2.TrackerCSRT_create()
 
     # Display FPS on frame
     cv2.putText(frame, "FPS : " + str(int(fps)), (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (50,170,50), 2)
