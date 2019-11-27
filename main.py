@@ -9,13 +9,17 @@ import ipc_pi as ipc
 import zmq
 
 def error_to_angles(err_x, err_y):
-    k_p_x = 0.06
+    k_p_x = 0.09
+    max_x_angle = 30
+    k_p_x_scale = 240 / max_x_angle
     diff_err_x = (err_x - 240) if abs(err_x - 240) > 35 else 0
-    yaw = (diff_err_x/8) * k_p_x # Proportional Gain for Yaw
+    yaw = (diff_err_x/k_p_x_scale) * k_p_x # Proportional Gain for Yaw
     
-    k_p_y = 0.05
+    k_p_y = 0.12 #0.05
+    max_y_angle = 15
+    k_p_y_scale = 320/ max_y_angle
     diff_err_y = (err_y - 320) if abs(err_y - 320) > 35 else 0
-    cam_rot = (diff_err_y/22.0) * k_p_y 
+    cam_rot = (diff_err_y/k_p_y_scale) * k_p_y 
     pitch = cam_rot * np.cos(np.pi / 3.) * -1
     roll = cam_rot * np.sin(np.pi / 3.)
     
