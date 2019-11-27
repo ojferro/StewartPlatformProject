@@ -22,21 +22,14 @@ def error_to_angles(err_x, err_y):
     return [roll,pitch,yaw]
 
 def main():
-    print("In main")
-    socket = ipc.create_socket(zmq.SUB, '169.254.128.132')
+    socket = ipc.create_socket(zmq.SUB)
     print("Initialized ZMQ socket")
-    # port = serial_arduino.make_serial_connection()
+
+    port = serial_arduino.make_serial_connection()
     min_ang = -45
     max_ang = 90
     current_rpy = [0,0,0]
     
-    # print("Calling Init CV")
-    # trk.init_cv()
-    # #Simply output frames until bbox is selected
-    # while not trk.tracker_enabled:
-    #     trk.get_cv_error()
-
-
     while True:
         # Get Error From CV
         error_x, error_y = ipc.recv_error(socket)
@@ -58,9 +51,9 @@ def main():
         # angles = [(min_ang + (random.random() * (max_ang - min_ang))) for i in range(6)]
         print(angles)
 
-        # packet = serial_arduino.format_packet(angles)
-        # serial_arduino.send_angles_to_arduino(port, packet)
-        #serial_arduino.wait_and_read_from_serial(port, 10)
+        packet = serial_arduino.format_packet(angles)
+        serial_arduino.send_angles_to_arduino(port, packet)
+        serial_arduino.wait_and_read_from_serial(port, 10)
 
         print("!!!SENT PACKET!!!")
 
