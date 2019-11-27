@@ -68,14 +68,13 @@ def get_cv_error():
   timer = cv2.getTickCount()
 
   key = cv2.waitKey(1)
-  # print("Key: {}".format(key))
-
+  track_frame_success = False
   # Update tracker
   if tracker_enabled:
-    ok, bbox = tracker.update(frame)
+    track_frame_success, bbox = tracker.update(frame)
 
     # Draw bounding box
-    if ok:
+    if track_frame_success:
         # Tracking success
         bbox_buffer[cnt%bbox_buffer_ln]=get_bbox_centre(bbox)
         centre = get_centres_avg(bbox_buffer)
@@ -110,8 +109,11 @@ def get_cv_error():
   # Display result
   cv2.imshow("frame", frame)
   cv2.waitKey(10)
+
+  # Return bbox if we tracked correctly, else return center angles to get angle error of 0
+  centres_avg = get_centres_avg(bbox_buffer) if track_frame_success else [240, 320]
   
-  return get_centres_avg(bbox_buffer) if tracker_enabled else -1
+  return centres_avg if tracker_enabled else [-1, -1] # B/c caller expects 2 values 
 
   # Exit if ESC pressed
   # if key == 27 : break
