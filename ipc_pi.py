@@ -18,10 +18,11 @@ def create_socket(socket_type = zmq.SUB, eth_addr='127.0.0.1'):
     socket = context.socket(socket_type)
 
     if (socket_type == zmq.PUB):
-        socket.bind("tcp://*:5555")
+        socket.bind("tcp://127.0.0.1:5556")
         print("Bound socket to {}".format("tcp://*:5555"))
     else:
-        socket.connect("tcp://%s:5555" % eth_addr)
+        socket.setsockopt(zmq.SUBSCRIBE, b"")
+        socket.connect("tcp://127.0.0.1:5556")
         print("Bound socket to {}".format("tcp://%s:5555" % eth_addr))
     
     return socket
