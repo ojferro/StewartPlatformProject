@@ -17,7 +17,7 @@ bool move_motors(int target_angles[num_servos]) {
   for (int servo = servo_1; servo < num_servos; servo++) {
     // Return early if any angles are bad
     if (!angle_in_bounds(target_angles[servo], servo)) {
-      printf("Invalid angle %d passed for servo %d (0-indexed!!!) to move_motors\r\n", target_angles[servo], servo);
+      // printf("Invalid angle %d passed for servo %d (0-indexed!!!) to move_motors\r\n", target_angles[servo], servo);
       return false;
     }
     
@@ -67,7 +67,7 @@ void move_motors_from_IK(int alpha[num_servos]) {
 
   for (int servo = servo_1; servo < num_servos; servo++) {
     if (alpha[servo] > ik_angle_max || alpha[servo] < ik_angle_min) {
-      printf("Invalid Angle %d for servo %d passed from IK (0-indexed!!!!)\r\n", alpha[servo], servo);
+      // printf("Invalid Angle %d for servo %d passed from IK (0-indexed!!!!)\r\n", alpha[servo], servo);
       return;
     }
 
@@ -83,21 +83,21 @@ void move_motors_from_IK(int alpha[num_servos]) {
 
 
 void center_platform() {
-  printf("Centering Platform\r\n");
+  // printf("Centering Platform\r\n");
   for (int i = 0; i < num_servos; i++) {
     servos[i].write(motor_calib_center[i]); 
   }
   
-  print_angles();
+  // print_angles();
 }
 
 void center_motors() {
-  printf("Centering Motors\r\n");
+  // printf("Centering Motors\r\n");
   for (int i = 0; i < num_servos; i++) {
     servos[i].write(middle_angle); 
   }
   
-  print_angles();
+  // print_angles();
 }
 
 

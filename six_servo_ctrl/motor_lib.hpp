@@ -88,7 +88,7 @@ void write_servo_position(servos_idx_e servo, int target_angle) {
   if  (angle_in_bounds(target_angle, servo)) {
         servos[servo].write(target_angle);
   } else {
-    printf("INVALID ANGLE: [%d] %d\r\n", (int)servo, target_angle);
+    // printf("INVALID ANGLE: [%d] %d\r\n", (int)servo, target_angle);
   }
 }
 

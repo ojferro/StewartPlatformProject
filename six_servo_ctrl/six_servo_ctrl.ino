@@ -28,7 +28,7 @@ void run_from_pi() {
 
   while(1) {
     if (get_joint_angles_from_pi(angles)) {
-      print_array(angles, 6);
+      // print_array(angles, 6);
       
 //      unsigned long start_time = micros();
 //      Serial.print("Motor Math Start Time:");
