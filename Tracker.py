@@ -29,11 +29,14 @@ bbox_buffer_ln = 5 # num bboxes to be averaged
 bbox_buffer=[]
 cnt=0
 cnt_since_failure = 0
+error_x = 0
+error_y = 0
 
 # Read video
 video = cv2.VideoCapture(0)#("dashcam_video.mp4")
-
+#video_out=0
 def init_cv():
+  #global video_out
   # Exit if video not opened.
   if not video.isOpened() or not video.read()[0]:
     print ("Could not open video")
@@ -47,7 +50,10 @@ def init_cv():
   # Read first frame.
   ok, frame = video.read()
   if not ok:
-    print ('Cannot read video file') 
+    print ('Cannot read video file')
+  #else:
+    #video_out = cv2.VideoWriter('run1.avi', cv2.VideoWriter_fourcc('M','J','P','G'), 30.0, (int(video.get(3)), int(video.get(4))));
+	
 
 def get_cv_error():
   global cnt
@@ -62,7 +68,7 @@ def get_cv_error():
 
   # Read a new frame
   ok, frame = video.read()
-  frame = cv2.flip(frame,0)  
+  frame = cv2.flip(frame,0)
 
   if not ok:
       return False
@@ -73,7 +79,10 @@ def get_cv_error():
   key = cv2.waitKey(1)
   track_frame_success = False
   # Update tracker
-  if tracker_enabled:
+  if key==ord('q'):
+    print("Releasing video file")
+    #video_out.release()
+  elif tracker_enabled:
     track_frame_success, bbox = tracker.update(frame)
 
     # Draw bounding box
@@ -96,7 +105,9 @@ def get_cv_error():
           tracker = cv2.TrackerMedianFlow_create()
 
     # Display FPS on frame
-    cv2.putText(frame, "FPS : " + str(int(fps)), (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (50,170,50), 2)
+    cv2.putText(frame, "FPS : " + str(int(fps)) + ", Frame #" + str(int(cnt)), (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,0,255), 2)
+    cv2.putText(frame, "ErrX: {}, ErrY: {}".format(error_x-240, error_y-320), (10,80), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0,255,0), 2)
+    #video_out.write(frame)
     
   elif key==115: #if s key pressed, select roi
     # Select a bounding box
@@ -129,6 +140,8 @@ def get_cv_error():
 # 8 = 240 pix diff / 30 deg yaws
 
 def main():
+  global error_x
+  global error_y
   # Initialize socket for IPC between tracker and main
   print("Initializing ZMQ socket")
   socket = ipc.create_socket(zmq.PUB)
@@ -144,7 +157,7 @@ def main():
   while True:
     # Get Error From CV
       error_x, error_y = get_cv_error()
-      ipc.send_error(socket, frame_num, [error_x, error_y])
+      ipc.send_error(socket, cnt, [error_x, error_y])
       frame_num+=1
 
 

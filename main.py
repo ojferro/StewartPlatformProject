@@ -34,10 +34,11 @@ def main():
     min_ang = -45
     max_ang = 90
     current_rpy = [0,0,0]
+    start_time = time.time()
     
     while True:
         # Get Error From CV
-        error_x, error_y = ipc.recv_error(socket)
+        frame_num, error_x, error_y = ipc.recv_error(socket)
         # Get Joint Angles From IK
         new_roll, new_pitch, new_yaw = error_to_angles(error_x, error_y)
         new_current_roll = current_rpy[0]+new_roll
@@ -48,18 +49,20 @@ def main():
         current_rpy[1] = new_current_pitch if abs(new_current_pitch) < 15 else (15*np.sign(new_current_pitch))
         current_rpy[2] = new_current_yaw if abs(new_current_yaw) < 30 else (30*np.sign(new_current_yaw))
 
-        print("ErrX: {}, ErrY: {} ----- New Yaw: {}, Sent Yaw: {}, New Roll: {}, Sent Roll: {}, New Pitch: {}, Sent Pitch: {}".format(error_x-240, error_y-320, new_yaw, current_rpy[2], new_roll, current_rpy[0], new_pitch, current_rpy[1]))
+        #print("ErrX: {}, ErrY: {} ----- New Yaw: {}, Sent Yaw: {}, New Roll: {}, Sent Roll: {}, New Pitch: {}, Sent Pitch: {}".format(error_x-240, error_y-320, new_yaw, current_rpy[2], new_roll, current_rpy[0], new_pitch, current_rpy[1]))
+        #print("{},{},{},{},{},{},{}, {}".format(error_x-240, error_y-320, new_yaw, current_rpy[2], new_roll, current_rpy[0], new_pitch, current_rpy[1]))
         angles = ik_pi.inv_kin([current_rpy[0],
                                 current_rpy[1],
                                 current_rpy[2]], [0,0,0])
         # Random angles for testing
         # angles = [(min_ang + (random.random() * (max_ang - min_ang))) for i in range(6)]
-        print(angles)
+        #print(angles)
+        print("{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}".format(time.time()-start_time, frame_num, error_x-240, error_y-320, new_yaw, current_rpy[2], new_roll, current_rpy[0], new_pitch, current_rpy[1],angles[0],angles[1],angles[2],angles[3],angles[4],angles[5]))
 
         packet = serial_arduino.format_packet(angles)
         serial_arduino.send_angles_to_arduino(port, packet)
 
-        print("!!!SENT PACKET!!!")
+        #print("!!!SENT PACKET!!!")
 
 def test_main():
     port = serial_arduino.make_serial_connection()

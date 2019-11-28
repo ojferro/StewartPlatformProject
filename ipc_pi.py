@@ -9,7 +9,7 @@ def send_error(socket, frame_num, cv_err, flags=0):
 
 def recv_error(socket, flags=0):
     md = socket.recv_json(flags=flags)
-    return md['err']
+    return [md['frame']] + md['err']
 
 def create_socket(socket_type = zmq.SUB):
     context = zmq.Context()
